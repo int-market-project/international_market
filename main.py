@@ -95,7 +95,6 @@ templates = Jinja2Templates(directory="templates")
 app.mount("/css", StaticFiles(directory="templates/css"), name="css")
 app.mount("/images", StaticFiles(directory="templates/images"), name="images")
 app.mount("/fonts", StaticFiles(directory="templates/fonts"), name="fonts")
-app.mount("/js", StaticFiles(directory="templates/js"), name="js")
 
 # ------------------------------------------------------------
 # Error Handling
@@ -3670,6 +3669,7 @@ async def admin_api_reply_message(
 
     # 3) Go back to unreplied messages list (page reload)
     return RedirectResponse(url="/core/ops/admin/dashboard/all-messages/", status_code=302)
+
 
 
 
