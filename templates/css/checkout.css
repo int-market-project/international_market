@@ -1,0 +1,258 @@
+/* -----------------------------------
+   Checkout Pages (Shipping + Confirm + Cancel)
+----------------------------------- */
+
+#checkout-shipping,
+#order-confirmation,
+#payment-cancelled {
+    width: 90%;
+    margin: 30px auto;
+}
+
+/* Layout */
+.checkout-steps-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.checkout-summary-container {
+    width: 100%;
+    margin-top: 18px;
+}
+
+@media (min-width: 1000px) {
+    #checkout-shipping {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 22px;
+        align-items: start;
+    }
+
+    #checkout-shipping>h1 {
+        grid-column: 1 / -1;
+    }
+
+    .checkout-steps-container {
+        grid-column: 1 / 2;
+        margin-top: 0;
+    }
+
+    .checkout-summary-container {
+        grid-column: 2 / 3;
+        margin-top: 0;
+        position: sticky;
+        top: 90px;
+    }
+}
+
+/* Step card */
+.checkout-step-card,
+.checkout-summary-card,
+.order-confirmation-card,
+.payment-cancelled-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* Step header */
+.checkout-step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.checkout-step-number {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    background: rgba(0, 0, 0, 0.06);
+}
+
+/* Form grid */
+.checkout-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+@media (min-width: 800px) {
+    .checkout-form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.checkout-form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.checkout-form-row-full {
+    grid-column: 1 / -1;
+}
+
+.checkout-input,
+.checkout-textarea {
+    border: 1px solid #dedede;
+    border-radius: 12px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: #fff;
+}
+
+.checkout-input:focus,
+.checkout-textarea:focus {
+    border-color: rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+}
+
+/* Payment options */
+.checkout-payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.checkout-pay-option {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    cursor: pointer;
+}
+
+.checkout-pay-option input[type="radio"] {
+    margin-top: 6px;
+    transform: scale(1.15);
+}
+
+.checkout-pay-box {
+    width: 100%;
+    border: 1px solid #e7e7e7;
+    border-radius: 14px;
+    padding: 12px;
+    transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.checkout-pay-option:hover .checkout-pay-box {
+    transform: translateY(-1px);
+    border-color: rgba(0, 0, 0, 0.18);
+}
+
+/* Step 3 area */
+.checkout-step3-container {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkout-primary-btn,
+.order-confirmation-btn,
+.payment-cancelled-btn {
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+    font-weight: 800;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+}
+
+/* IMPORTANT:
+   You already have button classes in your global CSS.
+   If you want this to match your theme, keep these minimal.
+*/
+.checkout-primary-btn {
+    background: #0a0a0a;
+    color: #ffffff;
+}
+
+.checkout-primary-btn:hover {
+    transform: translateY(-1px);
+}
+
+.checkout-helper-text {
+    margin: 0;
+}
+
+.checkout-error {
+    color: #e74c3c;
+    font-weight: 800;
+    margin: 0;
+}
+
+/* Summary */
+.checkout-summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.checkout-summary-total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+}
+
+.checkout-summary-note {
+    margin-top: 12px;
+}
+
+/* Confirmation page */
+.order-confirmation-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.order-confirmation-divider {
+    margin: 16px 0;
+    border-top: 1px solid #eee;
+}
+
+.order-confirmation-address {
+    margin-top: 10px;
+    line-height: 1.6;
+}
+
+.order-confirmation-actions,
+.payment-cancelled-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.order-confirmation-btn,
+.payment-cancelled-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    background: #0a0a0a;
+    color: #fff;
+}
+
+.order-confirmation-btn.secondary,
+.payment-cancelled-btn.secondary {
+    background: rgba(0, 0, 0, 0.08);
+    color: #111;
+}
+
+/* Cancel page */
+.payment-cancelled-card p {
+    margin-top: 10px;
+}

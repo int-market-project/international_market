@@ -1,0 +1,398 @@
+.product-details-content-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.product-details-price-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+}
+
+.product-original-price-container {
+    line-height: 1.5;
+}
+
+#product-details {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.product-details-info-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.product-details-images-container {
+    width: 25%;
+}
+
+.product-details-content-container {
+    width: 70%;
+}
+
+/* ---------- Product Details: Images Gallery ---------- */
+
+.pd-main-image-wrap {
+    width: 100%;
+    border: 1px solid var(--gray-line);
+    border-radius: 20px;
+    padding: 14px;
+    background: #fff;
+    overflow: hidden;
+    /* needed for zoom crop */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pd-main-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    transform: scale(1);
+    transition: transform 220ms ease;
+    transform-origin: center center;
+}
+
+/* hover zoom (image stays centered, just scales) */
+.pd-main-image-wrap:hover .pd-main-image {
+    transform: scale(1.08);
+}
+
+.pd-thumbs {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+
+    /* 🔑 center thumbnails when they don't fill width */
+    justify-content: center;
+
+    /* 🔑 allow scroll only when needed */
+    overflow-x: auto;
+
+    padding-bottom: 6px;
+}
+
+/* hide ugly scrollbar on webkit (optional) */
+.pd-thumbs::-webkit-scrollbar {
+    height: 8px;
+}
+
+.pd-thumbs::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 999px;
+}
+
+.pd-thumb {
+    border: 1px solid var(--gray-line);
+    background: #fff;
+    border-radius: 14px;
+    padding: 8px;
+    cursor: pointer;
+    flex: 0 0 auto;
+
+    /* equal-sized square buttons */
+    width: 64px;
+    height: 64px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.pd-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.pd-thumb:hover {
+    border-color: var(--ocean-green);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+}
+
+.pd-thumb.is-active {
+    border-color: var(--ocean-green);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.10);
+}
+
+.product-details-long-description-container p {
+    line-height: 1.5;
+}
+
+/* ---------- Product Details: Feature Tags ---------- */
+
+.product-details-features-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pd-tag {
+    border: 1px solid var(--gray-line);
+    border-radius: 999px;
+    padding: 6px 12px;
+    background: #fff;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* optional: subtle color hints without changing your theme */
+.pd-tag-popular {
+    border-color: var(--ocean-green);
+}
+
+.pd-tag-hot {
+    border-color: #ffb020;
+}
+
+.pd-tag-new {
+    border-color: #6a9cff;
+}
+
+/* ---------- Product Details: Rating Row ---------- */
+
+.product-details-rating-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+}
+
+.pd-rating-text {
+    line-height: 1;
+    margin: 0;
+}
+
+/* ---------- Product Details: Wishlist Button ---------- */
+
+.product-details-wishlist-container {
+    display: flex;
+    align-items: center;
+}
+
+.pd-wishlist-btn {
+    border-radius: 8px;
+    background-color: #def9ec;
+    padding: 10px 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.pd-wishlist-btn:hover {
+    transform: translateY(-1px);
+    background-color: #c9f1df;
+}
+
+.pd-wishlist-btn p {
+    margin: 0;
+}
+
+.product-details-reviews-and-ratings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ---------- Product Details: Add Rating Form ---------- */
+
+.product-details-review-container {
+    width: 100%;
+}
+
+.pd-review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 10px;
+}
+
+.pd-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pd-input,
+.pd-textarea {
+    width: 100%;
+    border: 1px solid var(--gray-line);
+    border-radius: 16px;
+    padding: 16px 18px;
+    outline: none;
+    background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pd-textarea {
+    resize: vertical;
+    min-height: 160px;
+}
+
+.pd-input:focus,
+.pd-textarea:focus {
+    border-color: var(--ocean-green);
+    box-shadow: 0 0 0 3px rgba(47, 179, 109, 0.14);
+}
+
+/* stars row */
+.pd-stars {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+}
+
+.pd-star {
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pd-star svg {
+    width: 28px;
+    height: 28px;
+    display: block;
+}
+
+/* default = green outline, no fill */
+.pd-star path {
+    fill: transparent;
+    stroke: var(--ocean-green);
+    stroke-width: 1.8;
+    transition: fill 0.12s ease, stroke 0.12s ease, transform 0.12s ease;
+}
+
+.pd-star:hover svg {
+    transform: scale(1.06);
+}
+
+/* green filled (selected) */
+.pd-star.is-green path {
+    fill: var(--ocean-green);
+    stroke: var(--ocean-green);
+}
+
+/* red outline (hovering above selected) */
+.pd-star.is-red-outline path {
+    fill: transparent;
+    stroke: #ff3b3b;
+}
+
+/* red filled (hovering below/within selected) */
+.pd-star.is-red-fill path {
+    fill: #ff3b3b;
+    stroke: #ff3b3b;
+}
+
+/* submit button (full width, green) */
+.pd-submit-btn {
+    width: 100%;
+    border: none;
+    border-radius: 16px;
+    padding: 18px 16px;
+    background: #41b478;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.pd-submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 26px rgba(0, 0, 0, 0.10);
+}
+
+.pd-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* ---------- Product Details: Reviews List ---------- */
+
+.product-details-ratings-container {
+    width: 100%;
+}
+
+.pd-reviews-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.pd-review-card {
+    width: 100%;
+    border: 1px solid var(--gray-line);
+    border-radius: 14px;
+    padding: 16px 18px;
+    background: #fff;
+}
+
+.pd-review-top {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+.pd-review-name {
+    margin: 0;
+    line-height: 1.2;
+}
+
+.pd-review-date {
+    font-weight: 400;
+}
+
+.pd-review-text {
+    margin: 10px 0 0 0;
+    line-height: 1.6;
+}
+
+/* ✅ Product details responsive (900px or less): images top, content bottom */
+@media (max-width: 900px) {
+
+    .product-details-info-container {
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .product-details-images-container,
+    .product-details-content-container {
+        width: 100%;
+    }
+
+    /* Optional: make thumbs feel nicer on mobile */
+    .pd-thumbs {
+        justify-content: flex-start;
+    }
+}

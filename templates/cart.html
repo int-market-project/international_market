@@ -1,0 +1,2265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{page_title}}</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <link rel="stylesheet" href="/css/cart.css">
+</head>
+
+<body>
+    <header>
+        <div id="pc-header-container">
+            <div class="pc-first-ribbon-header">
+                <div class="pc-first-ribbon-left-container">
+                    <div><a href="/about-us/" class="gray-text text lato-text">About Us</a></div>
+                    <div>
+                        <p class="gray-text text lato-text">|</p>
+                    </div>
+                    <div><a href="{{ '/my-account/' if current_customer else '/login' }}"
+                            class="gray-text text lato-text">My Account</a></div>
+                    <div>
+                        <p class="gray-text text lato-text">|</p>
+                    </div>
+                    <div><a href="{{ '/wishlist/' if current_customer else '/login' }}"
+                            class="gray-text text lato-text">Wishlist</a></div>
+                    <div>
+                        <p class="gray-text text lato-text">|</p>
+                    </div>
+                    <div><a href="/help-center/" class="gray-text text lato-text">Help center</a></div>
+                </div>
+                <div class="pc-first-ribbon-middle-container">
+                    <a href="/#hot-deals" class="pc-banner-link ocean-green-text text lato-text">
+                        <span class="pc-banner-text">
+                            Flash Deals Are Live — Steal the Best Offers Now!
+                        </span>
+                    </a>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const messages = [
+                            "Flash Deals Are Live — Steal the Best Offers Now!",
+                            "Mega Discounts Today — Shop Before Stocks Run Out!",
+                            "Fresh Deals Every Day — Shop & Save More",
+                            "Super Value Deals — Save More Every Day",
+                            "Exclusive Offers Live Now — Don’t Miss Out"
+                        ];
+
+                        const textEls = document.querySelectorAll('.pc-banner-text');
+                        if (!textEls.length) return;
+
+                        let idx = 0;
+
+                        function showMessage(i) {
+                            textEls.forEach(el => {
+                                el.textContent = messages[i];
+                                el.classList.add('is-visible');
+                            });
+                        }
+
+                        function hideMessage() {
+                            textEls.forEach(el => {
+                                el.classList.remove('is-visible');
+                            });
+                        }
+
+                        // first line
+                        showMessage(idx);
+
+                        setInterval(function () {
+                            hideMessage();
+                            setTimeout(function () {
+                                idx = (idx + 1) % messages.length;
+                                showMessage(idx);
+                            }, 400); // match CSS transition
+                        }, 2000); // each line stays ~2 seconds
+                    });
+                </script>
+                <div class="pc-first-ribbon-right-container">
+                    <p class="gray-text text lato-text">
+                        Need help? Call Us:
+                        <a href="tel:{{app_settings.number_to_give}}"
+                            class="ocean-green-text">{{app_settings.number_to_show}}</a>
+                    </p>
+                </div>
+            </div>
+            <div class="pc-second-ribbon-header">
+                <div class="pc-second-ribbon-logo-container">
+                    <a href="/"><img src="https://ik.imagekit.io/intmarket/logo.png?updatedAt=1763862184023" alt=""></a>
+                </div>
+                <div class="pc-second-ribbon-search-bar-container" data-global-search="1">
+                    <div class="pc-search-bar">
+                        <input id="globalKeywordPc" class="gray-text text lato-text" type="text"
+                            placeholder="Search for products...">
+                        <a id="globalSearchBtnPc" href="/search-results/" class="gray-text text lato-text">Search</a>
+                    </div>
+                </div>
+                <div class="pc-second-ribbon-buttons-container">
+                    <a href="{{ '/wishlist/' if current_customer else '/login' }}"
+                        class="pc-second-ribbon-button-container">
+                        <div class="pc-second-ribbon-button-container-div">
+                            <div class="pc-second-ribbon-button-image-container">
+                                <div class="pc-second-ribbon-button-image">
+                                    <img src="https://ik.imagekit.io/intmarket/wishlist.png?updatedAt=1763862183984"
+                                        alt="">
+                                </div>
+                                <div class="pc-second-ribbon-button-number">
+                                    <p id="wishlist-qty-pc" class="ocean-green-text text quicksand-text">{{ wishlist_qty
+                                        }}</p>
+                                </div>
+                            </div>
+                            <div class="pc-second-ribbon-button-name-container">
+                                <p class="gray-text text lato-text">Wishlist</p>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="{{ '/cart/' if current_customer else '/login' }}"
+                        class="pc-second-ribbon-button-container">
+                        <div class="pc-second-ribbon-button-container-div">
+                            <div class="pc-second-ribbon-button-image-container">
+                                <div class="pc-second-ribbon-button-image">
+                                    <img src="https://ik.imagekit.io/intmarket/cart.png?updatedAt=1763862183972" alt="">
+                                </div>
+                                <div class="pc-second-ribbon-button-number">
+                                    <p id="cart-qty-pc" class="ocean-green-text text quicksand-text">{{ cart_qty }}</p>
+                                </div>
+                            </div>
+                            <div class="pc-second-ribbon-button-name-container">
+                                <p class="gray-text text lato-text">Cart</p>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="{{ '/my-account/' if current_customer else '/login' }}"
+                        class="pc-second-ribbon-button-container">
+                        <div class="pc-second-ribbon-button-container-div">
+                            <div class="pc-second-ribbon-button-image-container">
+                                <div class="pc-second-ribbon-button-image">
+                                    <img src="https://ik.imagekit.io/intmarket/user.png?updatedAt=1763862183956" alt="">
+                                </div>
+                            </div>
+                            <div class="pc-second-ribbon-button-name-container">
+                                <p class="gray-text text lato-text">Account</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="pc-third-ribbon-header">
+                <div class="pc-third-ribbon-buttons-container">
+                    <div class="pc-menu-categories-wrapper">
+                        <button class="pc-menu-categories-button">
+                            <div class="categories-button-image-container">
+                                <img src="https://ik.imagekit.io/intmarket/apps.png?updatedAt=1763862183985" alt="">
+                            </div>
+                            <p class="white-text text quicksand-text">Browse All Categories</p>
+                            <div class="categories-button-arrow-container">
+                                <span class="categories-button-arrow">&#9662;</span> <!-- down arrow -->
+                            </div>
+                        </button>
+                        <div class="pc-menu-categories-dropdown">
+                            {% for category in parent_categories %}
+                            <div class="pc-menu-category-button-container">
+                                <a href="/subcategories/?category_name={{ category.slug }}"
+                                    class="pc-menu-category-button">
+                                    {% if category.image_url %}
+                                    <div class="category-button-image-container">
+                                        <img src="{{ category.image_url }}" alt="{{ category.name }}">
+                                    </div>
+                                    {% endif %}
+                                    <p class="rhino-text text quicksand-text">
+                                        {{ category.name }}
+                                    </p>
+                                    <div class="category-button-quantity-container">
+                                        <p class="white-text text quicksand-text">
+                                            {{ category.subcategory_count }}
+                                        </p>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const wrapper = document.querySelector('.pc-menu-categories-wrapper');
+                                if (!wrapper) return;
+
+                                const button = wrapper.querySelector('.pc-menu-categories-button');
+
+                                // Toggle open/close on button click
+                                button.addEventListener('click', function (e) {
+                                    e.stopPropagation(); // don't let the click bubble to document
+                                    wrapper.classList.toggle('is-open');
+                                });
+
+                                // Close when clicking anywhere else
+                                document.addEventListener('click', function (e) {
+                                    if (!wrapper.contains(e.target)) {
+                                        wrapper.classList.remove('is-open');
+                                    }
+                                });
+                            });
+                        </script>
+                    </div>
+                    <div class="pc-menu-hot-deals-button">
+                        <a href="/#hot-deals" class="pc-second-ribbon-button-container">
+                            <div class="pc-second-ribbon-button-container-div">
+                                <div class="pc-second-ribbon-button-image-container">
+                                    <div class="pc-second-ribbon-button-image">
+                                        <img src="https://ik.imagekit.io/intmarket/flame.png?updatedAt=1763862183933"
+                                            alt="">
+                                    </div>
+                                </div>
+                                <div class="pc-second-ribbon-button-name-container">
+                                    <p class="rhino-text text quicksand-text">Hot Deals</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="pc-third-ribbon-menu-container">
+                    <div class="pc-third-ribbon-menu-item">
+                        <a href="/" class="pc-third-ribbon-menu-link rhino-text text quicksand-text">Home</a>
+                    </div>
+                    <div class="pc-third-ribbon-menu-item">
+                        <a href="/about-us/" class="pc-third-ribbon-menu-link rhino-text text quicksand-text">About
+                            Us</a>
+                    </div>
+                    <div class="pc-third-ribbon-menu-item pc-has-mega">
+                        <button type="button"
+                            class="pc-mega-trigger pc-third-ribbon-mega-menu-link rhino-text text quicksand-text">
+                            Shop
+                            <span class="pc-mega-arrow">&#9662;</span>
+                        </button>
+                        <div class="pc-mega-dropdown">
+                            <div class="pc-dropdown-content-container">
+                                <h1 class="ocean-green-text quicksand-text sub-title">Shop by Categories</h1>
+
+                                {% for cat in mega_parent_categories %}
+                                <a href="/subcategories/?category_name={{ cat.slug }}"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">
+                                    {{ cat.name }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                            <div class="pc-dropdown-content-container">
+                                <h1 class="ocean-green-text quicksand-text sub-title">Featured Categories</h1>
+
+                                {% for sub in mega_featured_subcategories %}
+                                <a href="/search-results/?category={{ sub.parent_slug }}&subcategory={{ sub.slug }}&min_price=0&max_price=1000&hot_deal=true&popular=true&sort=default"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">
+                                    {{ sub.name }}
+                                </a>
+                                {% endfor %}
+
+                                <a href="/#featured-categories"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">
+                                    View All Featured Categories
+                                </a>
+                            </div>
+                            <div class="pc-dropdown-content-container">
+                                <h1 class="ocean-green-text quicksand-text sub-title">Store Tools</h1>
+                                <a href="{{ '/wishlist/' if current_customer else '/login' }}"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">Wishlist</a>
+                                <a href="{{ '/cart/' if current_customer else '/login' }}"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">Cart</a>
+                                <a href="/#popular-products"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">Popular
+                                    Products</a>
+                                <a href="/#hot-deals" class="pc-third-ribbon-menu-link gray-text lato-text text">Hot
+                                    Deals</a>
+                                <a href="/#new-arrivals" class="pc-third-ribbon-menu-link gray-text lato-text text">New
+                                    Arrivals</a>
+                                <a href="/cart#recently-viewed"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">Recently
+                                    Viewed</a>
+                            </div>
+                            <div class="pc-dropdown-last-container">
+                                <h1 class="ocean-green-text quicksand-text text">Fresh Arrivals</h1>
+                                <h1 class="rhino-text sub-title quicksand-text">Today’s Freshly Stocked Produce</h1>
+                                <div class="pc-dropdown-last-container-image-container">
+                                    <div class="pc-dropdown-last-container-image-container-button">
+                                        <a href="/#hot-deals" class="white-text text quicksand-text">Shop Fresh</a>
+                                    </div>
+                                    <div class="pc-dropdown-last-container-image-container-image">
+                                        <img src="https://ik.imagekit.io/intmarket/top-half-view-circle-shape-hot-peppers-cherry-tomatoes-basket-vegetables-circle-amber-background_140725-131600-removebg-preview.png"
+                                            alt="">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pc-third-ribbon-menu-item">
+                        <a href="/privacy-policy/"
+                            class="pc-third-ribbon-menu-link rhino-text text quicksand-text">Privacy Policy</a>
+                    </div>
+                    <div class="pc-third-ribbon-menu-item">
+                        <a href="/refund-and-return-policy/"
+                            class="pc-third-ribbon-menu-link rhino-text text quicksand-text">Refund and Return
+                            Policy</a>
+                    </div>
+                    <div class="pc-third-ribbon-menu-item">
+                        <a href="/contact-us/" class="pc-third-ribbon-menu-link rhino-text text quicksand-text">Contact
+                            Us</a>
+                    </div>
+                    <div class="pc-third-ribbon-menu-item">
+                        <a href="/suggest-product/"
+                            class="pc-third-ribbon-menu-link rhino-text text quicksand-text">Suggest a Product</a>
+                    </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const megaItems = document.querySelectorAll('.pc-has-mega');
+
+                            megaItems.forEach(item => {
+                                let hideTimeout;
+                                const trigger = item.querySelector('.pc-mega-trigger');
+                                const dropdown = item.querySelector('.pc-mega-dropdown');
+
+                                function openMega() {
+                                    megaItems.forEach(i => { if (i !== item) i.classList.remove('is-open'); });
+                                    clearTimeout(hideTimeout);
+                                    item.classList.add('is-open');
+                                }
+
+                                function closeMega() {
+                                    hideTimeout = setTimeout(() => {
+                                        item.classList.remove('is-open');
+                                    }, 500); // 0.5s grace to move cursor
+                                }
+
+                                // Hover logic
+                                trigger.addEventListener('mouseenter', openMega);
+                                trigger.addEventListener('mouseleave', closeMega);
+
+                                dropdown.addEventListener('mouseenter', () => {
+                                    clearTimeout(hideTimeout);
+                                    openMega();
+                                });
+
+                                dropdown.addEventListener('mouseleave', closeMega);
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-header-container">
+            <div class="m-first-ribbon">
+                <a href="/#hot-deals" class="pc-banner-link ocean-green-text text lato-text">
+                    <span class="pc-banner-text">
+                        Flash Deals Are Live — Steal the Best Offers Now!
+                    </span>
+                </a>
+            </div>
+            <div class="m-second-ribbon">
+                <div class="m-logo">
+                    <a href="/"><img src="https://ik.imagekit.io/intmarket/logo.png?updatedAt=1763862184023"
+                            alt="International Market Logo"></a>
+                </div>
+                <div class="m-header-right">
+                    <a href="{{ '/wishlist/' if current_customer else '/login' }}" class="m-icon-link">
+                        <div class="pc-second-ribbon-button-image-container">
+                            <div class="pc-second-ribbon-button-image">
+                                <img src="https://ik.imagekit.io/intmarket/wishlist.png?updatedAt=1763862183984"
+                                    alt="Wishlist">
+                            </div>
+                            <div class="pc-second-ribbon-button-number">
+                                <p id="wishlist-qty-mobile" class="ocean-green-text text quicksand-text">{{ wishlist_qty
+                                    }}</p>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="{{ '/cart/' if current_customer else '/login' }}" class="m-icon-link">
+                        <div class="pc-second-ribbon-button-image-container">
+                            <div class="pc-second-ribbon-button-image">
+                                <img src="https://ik.imagekit.io/intmarket/cart.png?updatedAt=1763862183972" alt="Cart">
+                            </div>
+                            <div class="pc-second-ribbon-button-number">
+                                <p id="cart-qty-mobile" class="ocean-green-text text quicksand-text">{{ cart_qty }}</p>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="{{ '/my-account/' if current_customer else '/login' }}" class="m-icon-link">
+                        <div class="pc-second-ribbon-button-image-container">
+                            <div class="pc-second-ribbon-button-image">
+                                <img src="https://ik.imagekit.io/intmarket/user.png?updatedAt=1763862183956"
+                                    alt="Account">
+                            </div>
+                        </div>
+                    </a>
+                    <button type="button" class="m-menu-toggle" aria-label="Open menu">
+                        <span class="m-bar"></span>
+                        <span class="m-bar"></span>
+                        <span class="m-bar"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="m-third-ribbon">
+                <div class="m-search-wrapper" data-global-search="1">
+                    <div class="pc-search-bar">
+                        <input id="globalKeywordMobile" class="gray-text text lato-text" type="text"
+                            placeholder="Search for products...">
+                        <a id="globalSearchBtnMobile" href="/search-results/"
+                            class="gray-text text lato-text">Search</a>
+                    </div>
+                </div>
+            </div>
+            <div id="m-menu-overlay" class="m-menu-overlay">
+                <div class="m-menu-panel">
+                    <button type="button" class="m-menu-close" aria-label="Close menu">&times;</button>
+                    <div class="m-menu-content">
+                        <div class="m-menu-control-container">
+                            <button class="gray-text text lato-text m-tab-btn-x92 m-tab-active"
+                                data-x92-target="panel-menu-x92">Menu</button>
+                            <button class="gray-text text lato-text m-tab-btn-x92"
+                                data-x92-target="panel-category-x92">Category</button>
+                        </div>
+                        <div class="m-tab-panels-x92">
+                            <div id="panel-menu-x92" class="m-tab-panel-x92 m-panel-active">
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/" class="m-third-ribbon-menu-link rhino-text text quicksand-text">Home</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/about-us/"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">About
+                                        Us</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item m-has-dropdown">
+                                    <button type="button" class="m-dropdown-toggle rhino-text text quicksand-text">
+                                        <span>Shop</span>
+                                        <span class="m-dropdown-arrow">&#9662;</span>
+                                    </button>
+                                    <div class="m-dropdown-panel">
+                                        <div class="m-dropdown-content-container">
+                                            <h1 class="ocean-green-text quicksand-text sub-title">Shop by Categories
+                                            </h1>
+
+                                            {% for cat in mega_parent_categories %}
+                                            <a href="/subcategories/?category_name={{ cat.slug }}"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">
+                                                {{ cat.name }}
+                                            </a>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="m-dropdown-content-container">
+                                            <h1 class="ocean-green-text quicksand-text sub-title">
+                                                Featured Categories
+                                            </h1>
+
+                                            {% for sub in mega_featured_subcategories %}
+                                            <a href="/search-results/?category={{ sub.parent_slug }}&subcategory={{ sub.slug }}&min_price=0&max_price=1000&hot_deal=true&popular=true&sort=default"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">
+                                                {{ sub.name }}
+                                            </a>
+                                            {% endfor %}
+
+                                            <a href="/#featured-categories"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">
+                                                View All Featured Categories
+                                            </a>
+                                        </div>
+                                        <div class="m-dropdown-content-container">
+                                            <h1 class="ocean-green-text quicksand-text sub-title">Store Tools</h1>
+                                            <a href="{{ '/wishlist/' if current_customer else '/login' }}"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">Wishlist</a>
+                                            <a href="{{ '/cart/' if current_customer else '/login' }}"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">Cart</a>
+                                            <a href="/#popular-products"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">Popular
+                                                Products</a>
+                                            <a href="/#hot-deals"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">Hot
+                                                Deals</a>
+                                            <a href="/#new-arrivals"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">New
+                                                Arrivals</a>
+                                            <a href="/cart#recently-viewed"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">Recently
+                                                Viewed</a>
+                                        </div>
+                                        <div class="m-dropdown-last-container">
+                                            <h1 class="ocean-green-text quicksand-text text">Fresh Arrivals</h1>
+                                            <h1 class="rhino-text sub-title quicksand-text">Today’s Freshly Stocked
+                                                Produce</h1>
+                                            <div class="m-dropdown-last-container-image-container">
+                                                <div class="m-dropdown-last-container-image-container-button">
+                                                    <a href="/#hot-deals" class="white-text text quicksand-text">Shop
+                                                        Fresh</a>
+                                                </div>
+                                                <div class="m-dropdown-last-container-image-container-image">
+                                                    <img src="https://ik.imagekit.io/intmarket/top-half-view-circle-shape-hot-peppers-cherry-tomatoes-basket-vegetables-circle-amber-background_140725-131600-removebg-preview.png"
+                                                        alt="">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            const shopItem = document.querySelector(
+                                                '#panel-menu-x92 .m-third-ribbon-menu-item.m-has-dropdown'
+                                            );
+                                            if (!shopItem) return;
+
+                                            const toggle = shopItem.querySelector('.m-dropdown-toggle');
+
+                                            toggle.addEventListener('click', function (e) {
+                                                e.stopPropagation();
+                                                shopItem.classList.toggle('is-open');
+                                            });
+                                        });
+                                    </script>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="{{ '/my-account/' if current_customer else '/login' }}"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">My Account</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="{{ '/wishlist/' if current_customer else '/login' }}"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">Wishlist</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/privacy-policy/"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">Privacy
+                                        Policy</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/refund-and-return-policy/"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">Refund and
+                                        Return
+                                        Policy</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/contact-us/"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">Contact
+                                        Us</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/suggest-product/"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">Suggest a
+                                        Product</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/help-center/"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">Help Center</a>
+                                </div>
+                            </div>
+                            <div id="panel-category-x92" class="m-tab-panel-x92">
+                                <div class="extra-space-above-container"></div>
+                                {% for category in parent_categories %}
+                                <div class="m-menu-category-button-container">
+                                    <a href="/subcategories/?category_name={{ category.slug }}"
+                                        class="m-menu-category-button">
+                                        {% if category.image_url %}
+                                        <div class="category-button-image-container">
+                                            <img src="{{ category.image_url }}" alt="{{ category.name }}">
+                                        </div>
+                                        {% endif %}
+                                        <p class="rhino-text text quicksand-text">
+                                            {{ category.name }}
+                                        </p>
+                                        <div class="category-button-quantity-container">
+                                            <p class="white-text text quicksand-text">
+                                                {{ category.subcategory_count }}
+                                            </p>
+                                        </div>
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="m-after-menu-content-menu">
+                            <div class="m-menu-hot-deals-button">
+                                <a href="/#hot-deals" class="m-second-ribbon-button-container">
+                                    <div class="pc-second-ribbon-button-container-div">
+                                        <div class="pc-second-ribbon-button-image-container">
+                                            <div class="pc-second-ribbon-button-image">
+                                                <img src="https://ik.imagekit.io/intmarket/flame.png?updatedAt=1763862183933"
+                                                    alt="">
+                                            </div>
+                                        </div>
+                                        <div class="pc-second-ribbon-button-name-container">
+                                            <p class="rhino-text text quicksand-text">Hot Deals</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="m-menu-need-help-content-container">
+                                <p class="gray-text text lato-text">
+                                    Need help? Call Us:
+                                    <a href="tel:{{app_settings.number_to_give}}"
+                                        class="ocean-green-text">{{app_settings.number_to_show}}</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                            const btns = document.querySelectorAll(".m-tab-btn-x92");
+                            const panels = document.querySelectorAll(".m-tab-panel-x92");
+
+                            btns.forEach(btn => {
+                                btn.addEventListener("click", () => {
+                                    const target = btn.dataset.x92Target;
+
+                                    // Remove active from buttons
+                                    btns.forEach(b => b.classList.remove("m-tab-active"));
+
+                                    // Add active to clicked button
+                                    btn.classList.add("m-tab-active");
+
+                                    // Hide all panels
+                                    panels.forEach(p => p.classList.remove("m-panel-active"));
+
+                                    // Show the clicked panel
+                                    document.getElementById(target).classList.add("m-panel-active");
+                                });
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const toggleBtn = document.querySelector('.m-menu-toggle');
+                    const overlay = document.getElementById('m-menu-overlay');
+                    const closeBtn = overlay ? overlay.querySelector('.m-menu-close') : null;
+                    const panel = overlay ? overlay.querySelector('.m-menu-panel') : null;
+
+                    if (!toggleBtn || !overlay || !closeBtn || !panel) return;
+
+                    function openMenu() {
+                        overlay.classList.add('is-open');
+                        document.body.classList.add('mobile-menu-open');
+                    }
+
+                    function closeMenu() {
+                        overlay.classList.remove('is-open');
+                        document.body.classList.remove('mobile-menu-open');
+                    }
+
+                    toggleBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        openMenu();
+                    });
+
+                    closeBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        closeMenu();
+                    });
+
+                    /* click outside panel closes menu */
+                    overlay.addEventListener('click', function (e) {
+                        if (!panel.contains(e.target)) {
+                            closeMenu();
+                        }
+                    });
+                });
+            </script>
+        </div>
+        <script>
+            (function () {
+                // If we're on /search-results/, do nothing.
+                // (You said search page won't include this container anyway, but this is extra safe.)
+                if (window.location.pathname === "/search-results/") return;
+
+                const pcInput = document.getElementById("globalKeywordPc");
+                const mInput = document.getElementById("globalKeywordMobile");
+                const pcBtn = document.getElementById("globalSearchBtnPc");
+                const mBtn = document.getElementById("globalSearchBtnMobile");
+
+                function isVisible(el) {
+                    return !!(el && el.offsetParent !== null);
+                }
+
+                function getKeyword() {
+                    // Prefer visible input
+                    if (isVisible(pcInput)) return (pcInput.value || "").trim();
+                    if (isVisible(mInput)) return (mInput.value || "").trim();
+
+                    // Fallback
+                    const pcVal = pcInput ? (pcInput.value || "").trim() : "";
+                    const mVal = mInput ? (mInput.value || "").trim() : "";
+                    return pcVal || mVal;
+                }
+
+                function setKeyword(val) {
+                    if (pcInput) pcInput.value = val;
+                    if (mInput) mInput.value = val;
+                }
+
+                // Keep PC + Mobile keyword synced
+                if (pcInput) pcInput.addEventListener("input", () => setKeyword(pcInput.value));
+                if (mInput) mInput.addEventListener("input", () => setKeyword(mInput.value));
+
+                function buildDefaultSearchParams(keyword) {
+                    const p = new URLSearchParams();
+
+                    // ✅ IMPORTANT: do NOT search if keyword is empty
+                    // (Prevents showing all products)
+                    if (keyword) {
+                        p.set("keyword", keyword);
+                    } else {
+                        return null;
+                    }
+
+                    // defaults
+                    p.set("category", "all");
+                    p.set("subcategory", "all");
+                    p.set("min_price", "0");
+                    p.set("max_price", "1000");
+                    p.set("hot_deal", "true");
+                    p.set("popular", "true");
+                    p.set("sort", "default");
+
+                    return p;
+                }
+
+                function goToSearchResultsWithDefaults(e) {
+                    if (e) e.preventDefault();
+
+                    const kw = getKeyword();
+                    const params = buildDefaultSearchParams(kw);
+
+                    // If keyword empty, just focus the visible input and stop.
+                    if (!params) {
+                        if (isVisible(pcInput)) pcInput.focus();
+                        else if (isVisible(mInput)) mInput.focus();
+                        return;
+                    }
+
+                    window.location.href = "/search-results/?" + params.toString();
+                }
+
+                // Button clicks
+                if (pcBtn) pcBtn.addEventListener("click", goToSearchResultsWithDefaults);
+                if (mBtn) mBtn.addEventListener("click", goToSearchResultsWithDefaults);
+
+                // Enter key triggers search
+                [pcInput, mInput].forEach(inp => {
+                    if (!inp) return;
+                    inp.addEventListener("keydown", (e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            goToSearchResultsWithDefaults(e);
+                        }
+                    });
+                });
+            })();
+        </script>
+    </header>
+    <section id="cart">
+        <h1 class="quicksand-text rhino-text title" style="margin-bottom: 20px;">My cart</h1>
+
+        <p id="cart-empty-inline" class="lato-text text"
+            style="color: red; margin-top: 10px; {% if not cart_is_empty %}display:none;{% endif %}">
+            Your cart is empty.
+        </p>
+
+        <div class="cart-page-container" style="{% if cart_is_empty %}display:none;{% endif %}">
+
+            <!-- Cart table -->
+            <div class="cart-table-container">
+                <div class="cart-table">
+
+                    <!-- Header row -->
+                    <div class="cart-row cart-header-row">
+                        <div class="cart-col cart-col-remove"></div>
+                        <div class="cart-col cart-col-product">Product</div>
+                        <div class="cart-col cart-col-price">Price</div>
+                        <div class="cart-col cart-col-qty">Quantity</div>
+                        <div class="cart-col cart-col-subtotal">Subtotal</div>
+                    </div>
+
+                    <!-- Body rows -->
+                    {% for product in cart %}
+                    <div class="cart-row cart-item-row" data-product-id="{{ product.product_id }}"
+                        data-unit-price="{{ product.price }}" data-qty="{{ product.qty }}">
+
+                        <!-- Remove -->
+                        <div class="cart-col cart-col-remove">
+                            <button type="button" class="cart-remove-btn js-cart-row-remove"
+                                data-product-id="{{ product.product_id }}" aria-label="Remove item">
+                                ×
+                            </button>
+                        </div>
+
+                        <!-- Product -->
+                        <div class="cart-col cart-col-product">
+                            <div class="cart-product-cell">
+                                <div class="cart-product-image">
+                                    <img src="{{ product.cover_image }}" alt="{{ product.name }}">
+                                </div>
+                                <div class="cart-product-info">
+                                    <a class="quicksand-text sub-sub-title rhino-text"
+                                        href="/product-details?product_id={{ product.product_id }}">
+                                        {{ product.name }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="cart-col cart-col-price">
+                            <p class="lato-text text gray-text">
+                                $<span class="js-cart-unit-price">{{ product.price }}</span>
+                            </p>
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="cart-col cart-col-qty">
+                            <div class="cart-qty-control">
+                                <button type="button" class="cart-qty-btn js-qty-minus"
+                                    data-product-id="{{ product.product_id }}" aria-label="Decrease quantity">
+                                    −
+                                </button>
+
+                                <input type="number" min="1" step="1" inputmode="numeric"
+                                    class="cart-qty-input js-qty-input" data-product-id="{{ product.product_id }}"
+                                    value="{{ product.qty }}" aria-label="Quantity" />
+
+                                <button type="button" class="cart-qty-btn js-qty-plus"
+                                    data-product-id="{{ product.product_id }}" aria-label="Increase quantity">
+                                    +
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Subtotal -->
+                        <div class="cart-col cart-col-subtotal">
+                            <p class="lato-text text gray-text">
+                                $<span class="js-cart-row-subtotal">0.00</span>
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Footer row: coupon + empty cart -->
+                    <div class="cart-row cart-footer-row">
+                        <div class="cart-footer-left">
+                            <div class="cart-coupon">
+                                <input type="text" class="cart-coupon-input js-coupon-code" placeholder="Coupon code"
+                                    aria-label="Coupon code">
+
+                                <button type="button" class="cart-coupon-btn js-apply-coupon">
+                                    Apply coupon
+                                </button>
+
+                                <button type="button" class="cart-remove-coupon-btn js-remove-coupon"
+                                    style="display:none;">
+                                    Remove coupon
+                                </button>
+
+                                <span class="cart-applied-coupon js-applied-coupon" style="display:none;"></span>
+                            </div>
+
+                            <p class="cart-coupon-message js-coupon-message" style="display:none;"></p>
+                        </div>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", () => {
+
+                                // ---------------------------------------
+                                // Coupon state (does NOT mark as used)
+                                // ---------------------------------------
+                                let appliedCouponCode = null;
+                                let reapplyTimer = null;
+
+                                // --- helpers ---
+                                function toNumber(val) {
+                                    const n = parseFloat(val);
+                                    return Number.isFinite(n) ? n : 0;
+                                }
+
+                                function toMoney(n) {
+                                    return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
+                                }
+
+                                function readSubtotalNumber() {
+                                    const el = document.querySelector(".js-cart-subtotal");
+                                    if (!el) return 0;
+                                    return toNumber((el.textContent || "").replace(/[^\d.]/g, ""));
+                                }
+
+                                function setTextMoney(selector, value) {
+                                    const el = document.querySelector(selector);
+                                    if (!el) return;
+                                    el.textContent = toMoney(value);
+                                }
+
+                                function showCouponMessage(text, type) {
+                                    const msg = document.querySelector(".js-coupon-message");
+                                    if (!msg) return;
+
+                                    msg.textContent = text || "";
+                                    msg.classList.remove("is-success", "is-error");
+                                    msg.classList.add(type === "success" ? "is-success" : "is-error");
+                                    msg.style.display = "block";
+                                }
+
+                                function setAppliedUI(codeOrNull) {
+                                    const removeBtn = document.querySelector(".js-remove-coupon");
+                                    const applied = document.querySelector(".js-applied-coupon");
+
+                                    if (codeOrNull) {
+                                        if (removeBtn) removeBtn.style.display = "inline-flex";
+                                        if (applied) {
+                                            applied.style.display = "inline-block";
+                                            applied.textContent = `Applied: ${codeOrNull}`;
+                                        }
+                                    } else {
+                                        if (removeBtn) removeBtn.style.display = "none";
+                                        if (applied) {
+                                            applied.style.display = "none";
+                                            applied.textContent = "";
+                                        }
+                                    }
+                                }
+
+                                function setTotalsFromServer(json) {
+                                    if (typeof json.subtotal === "number") setTextMoney(".js-cart-subtotal", json.subtotal);
+                                    if (typeof json.tax === "number") setTextMoney(".js-cart-tax", json.tax);
+                                    if (typeof json.shipping_fee === "number") setTextMoney(".js-cart-shipping", json.shipping_fee);
+                                    if (typeof json.total === "number") setTextMoney(".js-cart-total", json.total);
+                                }
+
+                                async function postJSON(url, data) {
+                                    const res = await fetch(url, {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify(data)
+                                    });
+                                    const json = await res.json().catch(() => ({}));
+                                    return { res, json };
+                                }
+
+                                // --- core apply (silent used for auto reapply) ---
+                                async function applyCoupon(code, { silent = false } = {}) {
+                                    const btn = document.querySelector(".js-apply-coupon");
+                                    const subtotal = readSubtotalNumber();
+                                    const cleanCode = (code || "").trim();
+
+                                    if (!cleanCode) {
+                                        if (!silent) showCouponMessage("Please enter a coupon code.", "error");
+                                        return;
+                                    }
+
+                                    if (btn && btn.dataset.loading === "1") return;
+                                    if (btn) {
+                                        btn.dataset.loading = "1";
+                                        btn.style.opacity = "0.7";
+                                        btn.style.pointerEvents = "none";
+                                    }
+
+                                    try {
+                                        const { res, json } = await postJSON("/api/coupons/apply", {
+                                            code: cleanCode,
+                                            subtotal: subtotal
+                                        });
+
+                                        if (res.status === 401 && json && json.redirect) {
+                                            window.location.href = json.redirect;
+                                            return;
+                                        }
+
+                                        if (!json) {
+                                            if (!silent) showCouponMessage("Something went wrong. Please try again.", "error");
+                                            return;
+                                        }
+
+                                        // Always set totals from server response (valid or invalid)
+                                        setTotalsFromServer(json);
+
+                                        if (json.ok) {
+                                            appliedCouponCode = (json.coupon && json.coupon.code) ? json.coupon.code : cleanCode.toUpperCase();
+                                            setAppliedUI(appliedCouponCode);
+                                            if (!silent) {
+                                                const msg = document.querySelector(".js-coupon-message");
+                                                if (msg) msg.style.display = "none";
+                                            }
+                                        } else {
+                                            // If coupon becomes invalid after subtotal changes, clear it
+                                            appliedCouponCode = null;
+                                            setAppliedUI(null);
+                                            if (!silent) showCouponMessage(json.message || "Invalid coupon.", "error");
+                                        }
+
+                                    } catch (err) {
+                                        console.error(err);
+                                        if (!silent) showCouponMessage("Network error. Please try again.", "error");
+                                    } finally {
+                                        if (btn) {
+                                            btn.dataset.loading = "0";
+                                            btn.style.opacity = "";
+                                            btn.style.pointerEvents = "";
+                                        }
+                                    }
+                                }
+
+                                function removeCoupon() {
+                                    appliedCouponCode = null;
+                                    setAppliedUI(null);
+                                    showCouponMessage("Coupon removed.", "success");
+
+                                    // ✅ Reset totals immediately (no discount)
+                                    const subtotal = readSubtotalNumber();
+                                    const tax = subtotal * 0.06;
+
+                                    const shipEl = document.querySelector(".js-cart-shipping");
+                                    const shipping = shipEl ? toNumber((shipEl.textContent || "").replace(/[^\d.]/g, "")) : 0;
+
+                                    const total = subtotal + tax + shipping;
+
+                                    setTextMoney(".js-cart-tax", tax);
+                                    setTextMoney(".js-cart-total", total);
+                                }
+
+                                // Click apply
+                                document.addEventListener("click", (e) => {
+                                    const btn = e.target.closest(".js-apply-coupon");
+                                    if (!btn) return;
+                                    e.preventDefault();
+
+                                    const input = document.querySelector(".js-coupon-code");
+                                    const code = (input?.value || "").trim();
+                                    applyCoupon(code, { silent: false });
+                                });
+
+                                // Enter key in input
+                                document.addEventListener("keydown", (e) => {
+                                    const input = e.target.closest(".js-coupon-code");
+                                    if (!input) return;
+
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        const code = (input.value || "").trim();
+                                        applyCoupon(code, { silent: false });
+                                    }
+                                });
+
+                                // Remove coupon
+                                document.addEventListener("click", (e) => {
+                                    const btn = e.target.closest(".js-remove-coupon");
+                                    if (!btn) return;
+                                    e.preventDefault();
+                                    removeCoupon();
+                                });
+
+                                // Auto re-apply when subtotal changes (quantity changes)
+                                document.addEventListener("cart:subtotalChanged", () => {
+                                    if (!appliedCouponCode) return;
+
+                                    // debounce while typing
+                                    if (reapplyTimer) clearTimeout(reapplyTimer);
+                                    reapplyTimer = setTimeout(() => {
+                                        applyCoupon(appliedCouponCode, { silent: true });
+                                    }, 250);
+                                });
+
+                            });
+                        </script>
+                        <div class="cart-footer-right">
+                            <button type="button" class="cart-empty-btn js-empty-cart">
+                                Empty cart
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Cart totals -->
+            <div class="cart-totals-container">
+                <h2 class="quicksand-text rhino-text sub-title" style="margin-bottom: 10px;">Cart totals</h2>
+
+                <div class="cart-totals-box">
+                    <div class="cart-totals-row">
+                        <div class="cart-totals-label">
+                            <p class="quicksand-text text rhino-text">Subtotal</p>
+                        </div>
+                        <div class="cart-totals-value">
+                            <p class="lato-text text gray-text">
+                                $<span class="js-cart-subtotal">0.00</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="cart-totals-row">
+                        <div class="cart-totals-label">
+                            <p class="quicksand-text text rhino-text">Tax (MD 6%)</p>
+                        </div>
+                        <div class="cart-totals-value">
+                            <p class="lato-text text gray-text">
+                                $<span class="js-cart-tax">0.00</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="cart-totals-row">
+                        <div class="cart-totals-label">
+                            <p class="quicksand-text text rhino-text">Shipping</p>
+                        </div>
+                        <div class="cart-totals-value">
+                            <p class="lato-text text gray-text">
+                                $<span class="js-cart-shipping">0.00</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="cart-totals-row">
+                        <div class="cart-totals-label">
+                            <p class="quicksand-text text rhino-text">Total</p>
+                        </div>
+                        <div class="cart-totals-value">
+                            <p class="quicksand-text sub-sub-title ocean-green-text">
+                                $<span class="js-cart-total">0.00</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cart-checkout-btn-container" style="margin-top: 15px;">
+                    <a href="#" class="cart-checkout-btn" id="btn-proceed-checkout">
+                        Proceed to checkout
+                    </a>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", () => {
+
+                        const btn = document.getElementById("btn-proceed-checkout");
+                        if (!btn) return;
+
+                        function toNumber(val) {
+                            const n = parseFloat(val);
+                            return Number.isFinite(n) ? n : 0;
+                        }
+
+                        function readMoney(selector) {
+                            const el = document.querySelector(selector);
+                            if (!el) return 0;
+                            return toNumber((el.textContent || "").replace(/[^\d.]/g, ""));
+                        }
+
+                        async function postJSON(url, data) {
+                            const res = await fetch(url, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(data)
+                            });
+                            const json = await res.json().catch(() => ({}));
+                            return { res, json };
+                        }
+
+                        btn.addEventListener("click", async (e) => {
+                            e.preventDefault();
+
+                            // build items list from cart rows
+                            const items = [];
+                            document.querySelectorAll(".cart-item-row").forEach(row => {
+                                const pid = parseInt(row.dataset.productId, 10);
+                                const qty = parseInt(row.dataset.qty || "1", 10);
+                                if (pid && qty > 0) {
+                                    items.push({ product_id: pid, quantity: qty });
+                                }
+                            });
+
+                            if (items.length === 0) return;
+
+                            // totals from UI
+                            const subtotal = readMoney(".js-cart-subtotal");
+                            const tax = readMoney(".js-cart-tax");
+                            const shipping_fee = readMoney(".js-cart-shipping");
+                            const total = readMoney(".js-cart-total");
+
+                            // discount not shown in UI currently -> set 0 for now (later we’ll connect coupon properly)
+                            const discount_amount = 0.0;
+                            const discounted_subtotal = subtotal - discount_amount;
+
+                            const payload = {
+                                items: items,
+                                subtotal: subtotal,
+                                discount_amount: discount_amount,
+                                discounted_subtotal: discounted_subtotal,
+                                tax: tax,
+                                shipping_fee: shipping_fee,
+                                total: total,
+                                coupon_code: null
+                            };
+
+                            // send draft
+                            const { res, json } = await postJSON("/api/checkout/draft", payload);
+
+                            if (res.status === 401 && json && json.redirect) {
+                                window.location.href = json.redirect;
+                                return;
+                            }
+
+                            if (!json || !json.ok) {
+                                // optional: show error message
+                                return;
+                            }
+
+                            // go to shipping page
+                            window.location.href = json.redirect || "/checkout/shipping";
+                        });
+
+                    });
+                </script>
+            </div>
+
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+
+                function setHeaderCartQty(qty) {
+                    const pc = document.getElementById("cart-qty-pc");
+                    const mobile = document.getElementById("cart-qty-mobile");
+                    if (pc) pc.textContent = qty;
+                    if (mobile) mobile.textContent = qty;
+                }
+
+                async function postJSON(url, data) {
+                    const res = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(data)
+                    });
+                    const json = await res.json().catch(() => ({}));
+                    return { res, json };
+                }
+
+                function showEmptyCartState() {
+                    const table = document.querySelector(".cart-table-container");
+                    const totals = document.querySelector(".cart-totals-container");
+
+                    if (table) table.style.display = "none";
+                    if (totals) totals.style.display = "none";
+
+                    if (!document.getElementById("cart-empty-msg")) {
+                        const msg = document.createElement("p");
+                        msg.id = "cart-empty-msg";
+                        msg.textContent = "Your cart is empty.";
+                        msg.style.color = "#e74c3c";
+                        msg.style.fontWeight = "700";
+                        msg.style.marginTop = "20px";
+                        msg.className = "quicksand-text";
+                        table?.parentNode?.appendChild(msg);
+                    }
+                }
+
+                document.addEventListener("click", async (e) => {
+                    const btn = e.target.closest(".cart-remove-btn");
+                    if (!btn) return;
+
+                    e.preventDefault();
+
+                    const row = btn.closest(".cart-item-row");
+                    if (!row) return;
+
+                    const productId = parseInt(row.dataset.productId, 10);
+                    if (!productId) return;
+
+                    btn.disabled = true;
+                    btn.style.opacity = "0.6";
+
+                    try {
+                        const { res, json } = await postJSON("/api/cart/remove", {
+                            product_id: productId
+                        });
+
+                        if (res.status === 401 && json.redirect) {
+                            window.location.href = json.redirect;
+                            return;
+                        }
+
+                        if (!json || !json.ok) {
+                            btn.disabled = false;
+                            btn.style.opacity = "";
+                            return;
+                        }
+
+                        // Remove row from DOM
+                        row.remove();
+                        document.dispatchEvent(new CustomEvent("cart:forceRecalc"));
+
+                        document.dispatchEvent(new CustomEvent("cart:itemChanged", {
+                            detail: { product_id: productId, in_cart: false }
+                        }));
+
+
+                        // Update header cart qty
+                        if (typeof json.cart_qty === "number") {
+                            setHeaderCartQty(json.cart_qty);
+                        }
+
+                        // If no items left → empty cart UI
+                        const remainingItems = document.querySelectorAll(".cart-item-row");
+                        if (remainingItems.length === 0) {
+                            showEmptyCartState();
+                        }
+
+                    } catch (err) {
+                        console.error(err);
+                        btn.disabled = false;
+                        btn.style.opacity = "";
+                    }
+                });
+
+            });
+        </script>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+
+                const TAX_RATE = 0.06;
+
+                // ✅ shipping fee (loaded once)
+                let SHIPPING_FEE = 0;
+
+                async function loadShippingFee() {
+                    try {
+                        const res = await fetch("/api/settings/shipping-fee");
+                        const json = await res.json().catch(() => ({}));
+                        if (json && json.ok && typeof json.shipping_fee === "number") {
+                            SHIPPING_FEE = Math.max(0, json.shipping_fee);
+                        } else {
+                            SHIPPING_FEE = 0;
+                        }
+                    } catch (e) {
+                        SHIPPING_FEE = 0;
+                    }
+                }
+
+                function toNumber(val) {
+                    const n = parseFloat(val);
+                    return Number.isFinite(n) ? n : 0;
+                }
+
+                function toMoney(n) {
+                    return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
+                }
+
+                function clampInt(n, min, max) {
+                    n = parseInt(n, 10);
+                    if (!Number.isFinite(n)) n = min;
+                    return Math.max(min, Math.min(max, n));
+                }
+
+                function getRowUnitPrice(row) {
+                    return toNumber(row.dataset.unitPrice);
+                }
+
+                function getRowQty(row) {
+                    const input = row.querySelector(".js-qty-input");
+                    return input ? clampInt(input.value, 1, 9999) : 1;
+                }
+
+                function setRowQty(row, qty) {
+                    const input = row.querySelector(".js-qty-input");
+                    if (!input) return;
+                    input.value = String(clampInt(qty, 1, 9999));
+                }
+
+                function updateRowSubtotal(row) {
+                    const unit = getRowUnitPrice(row);
+                    const qty = getRowQty(row);
+                    const subtotal = unit * qty;
+
+                    const subtotalEl = row.querySelector(".js-cart-row-subtotal");
+                    if (subtotalEl) subtotalEl.textContent = toMoney(subtotal);
+
+                    row.dataset.qty = String(qty);
+                    return subtotal;
+                }
+
+                function updateCartTotals({ emitEvent = true } = {}) {
+                    let subtotal = 0;
+
+                    document.querySelectorAll(".cart-item-row").forEach(row => {
+                        subtotal += updateRowSubtotal(row);
+                    });
+
+                    const tax = subtotal * TAX_RATE;
+
+                    // ✅ Shipping applied only if cart has items
+                    const hasItems = document.querySelectorAll(".cart-item-row").length > 0;
+                    const shipping = hasItems ? SHIPPING_FEE : 0;
+
+                    const total = subtotal + tax + shipping;
+
+                    const subtotalEl = document.querySelector(".js-cart-subtotal");
+                    const taxEl = document.querySelector(".js-cart-tax");
+                    const shipEl = document.querySelector(".js-cart-shipping");
+                    const totalEl = document.querySelector(".js-cart-total");
+
+                    if (subtotalEl) subtotalEl.textContent = toMoney(subtotal);
+                    if (taxEl) taxEl.textContent = toMoney(tax);
+                    if (shipEl) shipEl.textContent = toMoney(shipping);
+                    if (totalEl) totalEl.textContent = toMoney(total);
+
+                    // ✅ trigger event so your coupon script can auto reapply
+                    if (emitEvent) {
+                        document.dispatchEvent(new CustomEvent("cart:subtotalChanged"));
+                    }
+                }
+
+                // ✅ Initialize: load shipping fee then compute totals
+                (async () => {
+                    await loadShippingFee();
+                    updateCartTotals({ emitEvent: false });
+                })();
+
+                // ✅ NEW: Recalculate totals when cart rows change externally (remove ×, empty cart, etc.)
+                document.addEventListener("cart:forceRecalc", () => {
+                    updateCartTotals();
+                });
+
+                // Click handlers: + / -
+                document.addEventListener("click", (e) => {
+                    const minusBtn = e.target.closest(".js-qty-minus");
+                    const plusBtn = e.target.closest(".js-qty-plus");
+                    if (!minusBtn && !plusBtn) return;
+
+                    const btn = minusBtn || plusBtn;
+                    const row = btn.closest(".cart-item-row");
+                    if (!row) return;
+
+                    e.preventDefault();
+
+                    const currentQty = getRowQty(row);
+                    const newQty = minusBtn ? Math.max(1, currentQty - 1) : currentQty + 1;
+
+                    setRowQty(row, newQty);
+                    updateCartTotals();
+                });
+
+                // Live typing handler
+                document.addEventListener("input", (e) => {
+                    const input = e.target.closest(".js-qty-input");
+                    if (!input) return;
+
+                    const row = input.closest(".cart-item-row");
+                    if (!row) return;
+
+                    const raw = input.value.trim();
+                    if (raw === "") {
+                        row.dataset.qty = "1";
+                        updateCartTotals();
+                        return;
+                    }
+
+                    const qty = clampInt(raw, 1, 9999);
+                    row.dataset.qty = String(qty);
+
+                    updateCartTotals();
+                });
+
+                // On blur, enforce valid integer
+                document.addEventListener("blur", (e) => {
+                    const input = e.target.closest(".js-qty-input");
+                    if (!input) return;
+
+                    const row = input.closest(".cart-item-row");
+                    if (!row) return;
+
+                    const qty = clampInt(input.value, 1, 9999);
+                    input.value = String(qty);
+
+                    updateCartTotals();
+                }, true);
+
+            });
+        </script>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+
+                function setHeaderCartQty(qty) {
+                    const pc = document.getElementById("cart-qty-pc");
+                    const mobile = document.getElementById("cart-qty-mobile");
+                    if (pc) pc.textContent = qty;
+                    if (mobile) mobile.textContent = qty;
+                }
+
+                async function postJSON(url, data) {
+                    const res = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(data || {})
+                    });
+                    const json = await res.json().catch(() => ({}));
+                    return { res, json };
+                }
+
+                function showEmptyCartState() {
+                    const table = document.querySelector(".cart-table-container");
+                    const totals = document.querySelector(".cart-totals-container");
+
+                    if (table) table.style.display = "none";
+                    if (totals) totals.style.display = "none";
+
+                    if (!document.getElementById("cart-empty-msg")) {
+                        const msg = document.createElement("p");
+                        msg.id = "cart-empty-msg";
+                        msg.textContent = "Your cart is empty.";
+                        msg.style.color = "#e74c3c";
+                        msg.style.fontWeight = "700";
+                        msg.style.marginTop = "20px";
+                        msg.className = "quicksand-text";
+                        (table?.parentNode || document.querySelector("#cart"))?.appendChild(msg);
+                    }
+                }
+
+                document.addEventListener("click", async (e) => {
+                    const btn = e.target.closest(".js-empty-cart");
+                    if (!btn) return;
+
+                    e.preventDefault();
+
+                    if (btn.dataset.loading === "1") return;
+                    btn.dataset.loading = "1";
+                    btn.style.opacity = "0.7";
+                    btn.style.pointerEvents = "none";
+
+                    try {
+                        // ✅ You can implement this endpoint: /api/cart/empty
+                        const { res, json } = await postJSON("/api/cart/empty", {});
+
+                        if (res.status === 401 && json && json.redirect) {
+                            window.location.href = json.redirect;
+                            return;
+                        }
+
+                        if (!json || !json.ok) return;
+
+                        // Remove all rows from DOM (no reload)
+                        document.querySelectorAll(".cart-item-row").forEach(row => row.remove());
+
+                        // Update header qty
+                        if (typeof json.cart_qty === "number") {
+                            setHeaderCartQty(json.cart_qty);
+                        } else {
+                            setHeaderCartQty(0);
+                        }
+
+                        // Show empty cart UI
+                        showEmptyCartState();
+
+                    } catch (err) {
+                        console.error(err);
+                    } finally {
+                        btn.dataset.loading = "0";
+                        btn.style.opacity = "";
+                        btn.style.pointerEvents = "";
+                    }
+                });
+
+            });
+        </script>
+    </section>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const ADD_ICON = "https://ik.imagekit.io/intmarket/icons8-cart-100%20(1).png";
+            const ADDED_ICON = "https://ik.imagekit.io/intmarket/icons8-tick-100.png";
+
+            function showCart() {
+                const msg = document.getElementById("cart-empty-inline");
+                const wrap = document.querySelector(".cart-page-container");
+                if (msg) msg.style.display = "none";
+                if (wrap) wrap.style.display = "";
+            }
+
+            function hideCartIfEmpty() {
+                const wrap = document.querySelector(".cart-page-container");
+                const msg = document.getElementById("cart-empty-inline");
+                const hasItems = document.querySelectorAll(".cart-item-row").length > 0;
+                if (!hasItems) {
+                    if (wrap) wrap.style.display = "none";
+                    if (msg) msg.style.display = "";
+                }
+            }
+
+            function findRow(productId) {
+                return document.querySelector(`.cart-item-row[data-product-id="${productId}"]`);
+            }
+
+            function insertAtBottom(row) {
+                const table = document.querySelector(".cart-table");
+                const footer = document.querySelector(".cart-footer-row");
+                if (!table || !footer) return;
+                table.insertBefore(row, footer); // ✅ bottom before footer
+            }
+
+            function setAllButtons(productId, inCart) {
+                document.querySelectorAll(`.js-cart-toggle[data-product-id="${productId}"]`).forEach(btn => {
+                    btn.dataset.inCart = inCart ? "1" : "0";
+                    const img = btn.querySelector("img");
+                    const txt = btn.querySelector("p");
+                    if (!img || !txt) return;
+
+                    if (inCart) {
+                        img.src = ADDED_ICON;
+                        txt.textContent = "Added";
+                    } else {
+                        img.src = ADD_ICON;
+                        txt.textContent = "Add";
+                    }
+                });
+            }
+
+            function priceFromCard(card) {
+                const t = card.querySelector(".product-discounted-price-container p")?.textContent || "";
+                const n = parseFloat(t.replace(/[^\d.]/g, ""));
+                return Number.isFinite(n) ? n : 0;
+            }
+
+            function buildRow(productId, card) {
+                const name = card.querySelector(".product-name-container a")?.textContent.trim() || "";
+                const img = card.querySelector(".product-image-container img")?.src || "";
+                const price = priceFromCard(card);
+
+                const row = document.createElement("div");
+                row.className = "cart-row cart-item-row";
+                row.dataset.productId = String(productId);
+                row.dataset.unitPrice = String(price);
+                row.dataset.qty = "1";
+
+                row.innerHTML = `
+      <div class="cart-col cart-col-remove">
+        <button type="button" class="cart-remove-btn js-cart-row-remove"
+          data-product-id="${productId}" aria-label="Remove item">×</button>
+      </div>
+
+      <div class="cart-col cart-col-product">
+        <div class="cart-product-cell">
+          <div class="cart-product-image">
+            <img src="${img}" alt="${name}">
+          </div>
+          <div class="cart-product-info">
+            <a class="quicksand-text sub-sub-title rhino-text"
+              href="/product-details?product_id=${productId}">${name}</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="cart-col cart-col-price">
+        <p class="lato-text text gray-text">$<span class="js-cart-unit-price">${price}</span></p>
+      </div>
+
+      <div class="cart-col cart-col-qty">
+        <div class="cart-qty-control">
+          <button type="button" class="cart-qty-btn js-qty-minus"
+            data-product-id="${productId}">−</button>
+          <input type="number" class="cart-qty-input js-qty-input"
+            data-product-id="${productId}" value="1" min="1">
+          <button type="button" class="cart-qty-btn js-qty-plus"
+            data-product-id="${productId}">+</button>
+        </div>
+      </div>
+
+      <div class="cart-col cart-col-subtotal">
+        <p class="lato-text text gray-text">$<span class="js-cart-row-subtotal">0.00</span></p>
+      </div>
+    `;
+                return row;
+            }
+
+            document.addEventListener("cart:itemChanged", (e) => {
+                const d = e.detail || {};
+                const productId = parseInt(d.product_id, 10);
+                if (!productId) return;
+
+                const inCart = !!d.in_cart;
+
+                if (inCart) {
+                    showCart();
+
+                    if (!findRow(productId)) {
+                        const card = document.querySelector(`.js-cart-toggle[data-product-id="${productId}"]`)?.closest(".product-container");
+                        if (card) {
+                            const row = buildRow(productId, card);
+                            insertAtBottom(row);
+                        }
+                    }
+
+                    setAllButtons(productId, true);
+                    document.dispatchEvent(new CustomEvent("cart:forceRecalc"));
+                    return;
+                }
+
+                const row = findRow(productId);
+                if (row) row.remove();
+
+                setAllButtons(productId, false);
+                document.dispatchEvent(new CustomEvent("cart:forceRecalc"));
+                hideCartIfEmpty();
+            });
+
+        });
+    </script>
+    <section id="recently-viewed">
+        <h1 class="quicksand-text rhino-text title" style="margin-bottom: 20px;">Recently Viewed Products</h1>
+        <div class="all-products-container">
+            {% for product in recently_viewed_products %}
+            <div class="product-container">
+                <div class="product-top-content-container">
+                    <div class="product-percentage-container">
+                        <p class="lato-text text white-text">{{ product.percentage_discount }}%</p>
+                    </div>
+                    <div class="product-type-container">
+                        <p class="lato-text text white-text">Pop</p>
+                    </div>
+                </div>
+                <div class="product-bottom-content-container">
+                    <div class="product-image-container">
+                        <img src="{{ product.cover_image }}" alt="{{ product.name }}">
+                    </div>
+                    <div class="product-content-container">
+                        <div class="product-category-container">
+                            <a class="lato-text text gray-text"
+                                href="/subcategories/?category_name={{ product.category_slug }}">
+                                {{ product.category_name }}
+                            </a>
+                        </div>
+                        <div class="product-name-and-wishlist-container">
+                            <div class="product-name-container">
+                                <a class="quicksand-text sub-sub-title rhino-text"
+                                    href="/product-details?product_id={{ product.product_id }}">
+                                    {{ product.name }}
+                                </a>
+                            </div>
+                            <div class="product-wishlist-container">
+                                <a href="{{ '/wishlist/' if current_customer else '/login' }}"
+                                    class="js-wishlist-toggle wishlist-heart-btn {% if product.in_wishlist %}is-active{% endif %}"
+                                    data-product-id="{{ product.product_id }}"
+                                    data-in-wishlist="{{ 1 if product.in_wishlist else 0 }}"
+                                    aria-label="Toggle wishlist">
+
+                                    <!-- empty -->
+                                    <span class="heart-icon heart-empty" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24">
+                                            <path
+                                                d="M12 21s-7.2-4.6-9.6-8.8C.4 9.1 1.6 6.3 4.5 5.5c1.7-.5 3.5.1 4.7 1.4L12 9.7l2.8-2.8c1.2-1.3 3-1.9 4.7-1.4 2.9.8 4.1 3.6 2.1 6.7C19.2 16.4 12 21 12 21z" />
+                                        </svg>
+                                    </span>
+
+                                    <!-- filled -->
+                                    <span class="heart-icon heart-filled" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24">
+                                            <path
+                                                d="M12 21s-7.2-4.6-9.6-8.8C.4 9.1 1.6 6.3 4.5 5.5c1.7-.5 3.5.1 4.7 1.4L12 9.7l2.8-2.8c1.2-1.3 3-1.9 4.7-1.4 2.9.8 4.1 3.6 2.1 6.7C19.2 16.4 12 21 12 21z" />
+                                        </svg>
+                                    </span>
+                                </a>
+                            </div>
+                            <script>
+                                document.addEventListener("DOMContentLoaded", () => {
+
+                                    function setHeaderWishlistQty(qty) {
+                                        const pc = document.getElementById("wishlist-qty-pc");
+                                        const mobile = document.getElementById("wishlist-qty-mobile");
+                                        if (pc) pc.textContent = qty;
+                                        if (mobile) mobile.textContent = qty;
+                                    }
+
+                                    async function postJSON(url, data) {
+                                        const res = await fetch(url, {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify(data)
+                                        });
+                                        const json = await res.json().catch(() => ({}));
+                                        return { res, json };
+                                    }
+
+                                    function setHeartState(btn, inWishlist) {
+                                        btn.dataset.inWishlist = inWishlist ? "1" : "0";
+                                        if (inWishlist) {
+                                            btn.classList.add("is-active");
+                                            // pop animation
+                                            btn.classList.remove("is-animating");
+                                            void btn.offsetWidth; // reflow to restart animation
+                                            btn.classList.add("is-animating");
+                                        } else {
+                                            btn.classList.remove("is-active");
+                                        }
+                                    }
+
+                                    document.addEventListener("click", async (e) => {
+                                        const btn = e.target.closest(".js-wishlist-toggle");
+                                        if (!btn) return;
+
+                                        // ✅ If user is not signed in, this button is just a normal <a href="/login">.
+                                        // In that case, do NOT block navigation.
+                                        if (!btn.dataset.productId) return;
+
+                                        e.preventDefault();
+
+                                        const productId = parseInt(btn.dataset.productId, 10);
+                                        if (!productId) return;
+
+                                        const currentlyInWishlist = btn.dataset.inWishlist === "1";
+                                        const url = currentlyInWishlist ? "/api/wishlist/remove" : "/api/wishlist/add";
+
+                                        if (btn.dataset.loading === "1") return;
+                                        btn.dataset.loading = "1";
+                                        btn.style.opacity = "0.7";
+                                        btn.style.pointerEvents = "none";
+
+                                        try {
+                                            const { res, json } = await postJSON(url, { product_id: productId });
+
+                                            if (res.status === 401 && json && json.redirect) {
+                                                window.location.href = json.redirect;
+                                                return;
+                                            }
+
+                                            if (!json || !json.ok) return;
+
+                                            setHeartState(btn, json.in_wishlist);
+                                            setHeaderWishlistQty(json.wishlist_qty);
+
+                                        } catch (err) {
+                                            console.error(err);
+                                        } finally {
+                                            btn.dataset.loading = "0";
+                                            btn.style.opacity = "";
+                                            btn.style.pointerEvents = "";
+                                        }
+                                    });
+
+                                });
+                            </script>
+                        </div>
+                        <div class="product-rating-container" data-rating="{{ product.rating }}"
+                            aria-label="Rating {{ product.rating }} out of 5">
+                        </div>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", () => {
+
+                                // Star SVG path (nice rounded star)
+                                const STAR_SVG = `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 2.3l2.85 6.56 7.15.62-5.42 4.7 1.62 7.02L12 17.9 5.8 21.2l1.62-7.02L2 9.48l7.15-.62L12 2.3z"></path>
+    </svg>
+  `;
+
+                                function clamp(num, min, max) {
+                                    return Math.min(max, Math.max(min, num));
+                                }
+
+                                function buildStar(type) {
+                                    if (type === "full") {
+                                        return `<span class="star full">${STAR_SVG}</span>`;
+                                    }
+                                    if (type === "empty") {
+                                        return `<span class="star empty">${STAR_SVG}</span>`;
+                                    }
+                                    // half
+                                    return `
+      <span class="star half">
+        <span class="base">${STAR_SVG}</span>
+        <span class="fill">${STAR_SVG}</span>
+      </span>
+    `;
+                                }
+
+                                function renderRating(container, ratingRaw) {
+                                    let rating = parseFloat(ratingRaw);
+                                    if (Number.isNaN(rating)) rating = 0;
+
+                                    rating = clamp(rating, 0, 5);
+
+                                    // Round to nearest 0.5 (optional but makes display consistent)
+                                    rating = Math.round(rating * 2) / 2;
+
+                                    const fullCount = Math.floor(rating);
+                                    const hasHalf = (rating - fullCount) === 0.5;
+                                    const emptyCount = 5 - fullCount - (hasHalf ? 1 : 0);
+
+                                    let html = "";
+
+                                    for (let i = 0; i < fullCount; i++) html += buildStar("full");
+                                    if (hasHalf) html += buildStar("half");
+                                    for (let i = 0; i < emptyCount; i++) html += buildStar("empty");
+
+                                    container.innerHTML = html;
+
+                                    // Accessible label
+                                    container.setAttribute("aria-label", `Rating ${rating} out of 5`);
+                                    container.setAttribute("role", "img");
+                                }
+
+                                document.querySelectorAll(".product-rating-container").forEach(el => {
+                                    renderRating(el, el.dataset.rating);
+                                });
+
+                            });
+                        </script>
+                        <div class="product-brand-container">
+                            <p class="lato-text text gray-text">By <span>
+                                    <a class="quicksand-text text ocean-green-text" href="#">
+                                        {{ product.brand }}
+                                    </a>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="product-end-container">
+                        <div class="product-price-container">
+                            <div class="product-discounted-price-container">
+                                <p class="quicksand-text sub-sub-title ocean-green-text">${{product.discounted_price}}
+                                </p>
+                            </div>
+                            <div class="product-original-price-container">
+                                <p class="lato-text text gray-text">${{product.price}}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="product-cart-container">
+                            {% if current_customer %}
+                            {% if product.in_cart %}
+                            <a href="#" class="js-cart-toggle" data-product-id="{{ product.product_id }}"
+                                data-in-cart="1">
+                                <img src="https://ik.imagekit.io/intmarket/icons8-tick-100.png" alt="">
+                                <p class="text quicksand-text" style="color: #4aba81;">Added</p>
+                            </a>
+                            {% else %}
+                            <a href="#" class="js-cart-toggle" data-product-id="{{ product.product_id }}"
+                                data-in-cart="0">
+                                <img src="https://ik.imagekit.io/intmarket/icons8-cart-100%20(1).png" alt="">
+                                <p class="text quicksand-text" style="color: #4aba81;">Add</p>
+                            </a>
+                            {% endif %}
+                            {% else %}
+                            <!-- Not logged in: behaves like header (go to login) -->
+                            <a href="/login">
+                                <img src="https://ik.imagekit.io/intmarket/icons8-cart-100%20(1).png" alt="">
+                                <p class="text quicksand-text" style="color: #4aba81;">Add</p>
+                            </a>
+                            {% endif %}
+                        </div>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", () => {
+
+                                const ADD_ICON = "https://ik.imagekit.io/intmarket/icons8-cart-100%20(1).png";
+                                const ADDED_ICON = "https://ik.imagekit.io/intmarket/icons8-tick-100.png";
+
+                                function setHeaderCartQty(qty) {
+                                    const pc = document.getElementById("cart-qty-pc");
+                                    const mobile = document.getElementById("cart-qty-mobile");
+                                    if (pc) pc.textContent = qty;
+                                    if (mobile) mobile.textContent = qty;
+                                }
+
+                                function setButtonState(aTag, inCart) {
+                                    aTag.dataset.inCart = inCart ? "1" : "0";
+
+                                    const img = aTag.querySelector("img");
+                                    const txt = aTag.querySelector("p");
+
+                                    if (!img || !txt) return;
+
+                                    if (inCart) {
+                                        img.src = ADDED_ICON;
+                                        txt.textContent = "Added";
+                                    } else {
+                                        img.src = ADD_ICON;
+                                        txt.textContent = "Add";
+                                    }
+                                }
+
+                                async function postJSON(url, data) {
+                                    const res = await fetch(url, {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify(data)
+                                    });
+                                    const json = await res.json().catch(() => ({}));
+                                    return { res, json };
+                                }
+
+                                document.addEventListener("click", async (e) => {
+                                    const btn = e.target.closest(".js-cart-toggle");
+                                    if (!btn) return;
+
+                                    e.preventDefault();
+
+                                    const productId = parseInt(btn.dataset.productId, 10);
+                                    if (!productId) return;
+
+                                    const currentlyInCart = btn.dataset.inCart === "1";
+                                    const url = currentlyInCart ? "/api/cart/remove" : "/api/cart/add";
+
+                                    // Optional: prevent double clicks
+                                    if (btn.dataset.loading === "1") return;
+                                    btn.dataset.loading = "1";
+                                    btn.style.opacity = "0.7";
+                                    btn.style.pointerEvents = "none";
+
+                                    try {
+                                        const { res, json } = await postJSON(url, { product_id: productId });
+
+                                        if (res.status === 401 && json && json.redirect) {
+                                            window.location.href = json.redirect;
+                                            return;
+                                        }
+
+                                        if (!json || !json.ok) {
+                                            // fail-safe: do nothing if server says no
+                                            return;
+                                        }
+
+                                        // Update UI based on server truth
+                                        setButtonState(btn, json.in_cart);
+                                        setHeaderCartQty(json.cart_qty);
+
+                                        document.dispatchEvent(new CustomEvent("cart:itemChanged", {
+                                            detail: { product_id: productId, in_cart: !!json.in_cart }
+                                        }));
+
+
+                                    } catch (err) {
+                                        // network error: revert nothing (silent)
+                                        console.error(err);
+                                    } finally {
+                                        btn.dataset.loading = "0";
+                                        btn.style.opacity = "";
+                                        btn.style.pointerEvents = "";
+                                    }
+                                });
+
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    <footer class="footer-section">
+        <div class="footer-newsletter-section">
+            <div class="newsletter-subscribe-container">
+                <div class="newsletter-subscribe-content-container">
+                    <h1 class="quicksand-text rhino-text page-title">Join our list & never miss exclusive grocery deals
+                        again
+                    </h1>
+                    <p class="lato-text text gray-text">Sign up today and receive updates, discounts, and weekly offers
+                    </p>
+                    <div class="newsletter-subscribe-input-container">
+                        <input id="newsletterEmail" class="gray-text text lato-text" type="text"
+                            placeholder="Your email address">
+                        <a id="newsletterSubscribeBtn" href="#" class="gray-text text lato-text">Subscribe</a>
+                    </div>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                            const input = document.getElementById("newsletterEmail");
+                            const btn = document.getElementById("newsletterSubscribeBtn");
+
+                            if (!input || !btn) return;
+
+                            btn.addEventListener("click", async (e) => {
+                                e.preventDefault();
+
+                                const email = (input.value || "").trim();
+                                if (!email) return;
+
+                                try {
+                                    const res = await fetch("/api/newsletter/subscribe", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ email })
+                                    });
+
+                                    const data = await res.json();
+
+                                    if (data.ok) {
+                                        input.value = ""; // ✅ clear input
+                                        // optional: show success message
+                                        // alert(data.message);
+                                    } else {
+                                        // optional: show error message
+                                        // alert(data.message || "Failed");
+                                    }
+                                } catch (err) {
+                                    // optional: alert("Network error");
+                                    console.error(err);
+                                }
+                            });
+                        });
+                    </script>
+                </div>
+                <div class="newsletter-subscribe-image-container">
+                    <img src="https://themepanthers.com/wp/nest/d1/wp-content/uploads/2022/02/banner-9-min.png" alt="">
+                </div>
+            </div>
+        </div>
+        <div class="footer-features-section">
+            <div class="footer-feature-container">
+                <div class="footer-feature-image-container">
+                    <img src="https://ik.imagekit.io/intmarket/icon-1.png" alt="">
+                </div>
+                <div class="footer-feature-content-container">
+                    <h1 class="sub-sub-title quicksand-text rhino-text">Best prices & offers</h1>
+                    <p class="text lato-text gray-text">Fresh savings on daily essentials</p>
+                </div>
+            </div>
+            <div class="footer-feature-container">
+                <div class="footer-feature-image-container">
+                    <img src="https://ik.imagekit.io/intmarket/icon-2.png" alt="">
+                </div>
+                <div class="footer-feature-content-container">
+                    <h1 class="sub-sub-title quicksand-text rhino-text">Freshness Guaranteed</h1>
+                    <p class="text lato-text gray-text">Quality checked before delivery</p>
+                </div>
+            </div>
+            <div class="footer-feature-container">
+                <div class="footer-feature-image-container">
+                    <img src="https://ik.imagekit.io/intmarket/icon-3.png" alt="">
+                </div>
+                <div class="footer-feature-content-container">
+                    <h1 class="sub-sub-title quicksand-text rhino-text">Great daily deal</h1>
+                    <p class="text lato-text gray-text">Exclusive offers when you sign up</p>
+                </div>
+            </div>
+            <div class="footer-feature-container">
+                <div class="footer-feature-image-container">
+                    <img src="https://ik.imagekit.io/intmarket/icon-4.png" alt="">
+                </div>
+                <div class="footer-feature-content-container">
+                    <h1 class="sub-sub-title quicksand-text rhino-text">Wide assortment</h1>
+                    <p class="text lato-text gray-text">Everything you need in one place</p>
+                </div>
+            </div>
+            <div class="footer-feature-container">
+                <div class="footer-feature-image-container">
+                    <img src="https://ik.imagekit.io/intmarket/icon-5.png" alt="">
+                </div>
+                <div class="footer-feature-content-container">
+                    <h1 class="sub-sub-title quicksand-text rhino-text">Customer Support</h1>
+                    <p class="text lato-text gray-text">Fast help whenever you need it</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-menu-section">
+            <div class="footer-menu-main-content-container">
+                <div class="footer-logo-container">
+                    <img src="https://ik.imagekit.io/intmarket/logo.png?updatedAt=1763862184023" alt="">
+                </div>
+                <div class="footer-description-container">
+                    <p class="lato-text text rhino-text">Fresh, high-quality groceries delivered with care—bringing
+                        everyday essentials, great value, and trusted service straight to your neighborhood, every
+                        single day.</p>
+                </div>
+                <div class="footer-info-container">
+                    <div class="footer-info-item-container">
+                        <div class="footer-info-item-image-container">
+                            <img src="https://ik.imagekit.io/intmarket/icons8-location-100%20(3).png" alt="">
+                        </div>
+                        <div class="footer-info-item-content-container">
+                            <p class="lato-text text rhino-text">{{app_settings.address}}</p>
+                        </div>
+                    </div>
+                    <div class="footer-info-item-container">
+                        <div class="footer-info-item-image-container">
+                            <img src="https://ik.imagekit.io/intmarket/icons8-headphones-100%20(1).png" alt="">
+                        </div>
+                        <div class="footer-info-item-content-container">
+                            <p class="rhino-text text lato-text">
+                                Need help? Call Us:
+                                <a href="tel:{{app_settings.number_to_give}}"
+                                    class="ocean-green-text">{{app_settings.number_to_show}}</a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="footer-info-item-container">
+                        <div class="footer-info-item-image-container">
+                            <img src="https://ik.imagekit.io/intmarket/icons8-email-100.png?updatedAt=1766535705131"
+                                alt="">
+                        </div>
+                        <div class="footer-info-item-content-container">
+                            <p class="lato-text text rhino-text">{{app_settings.email}}</p>
+                        </div>
+                    </div>
+                    <div class="footer-info-item-container">
+                        <div class="footer-info-item-image-container">
+                            <img src="https://ik.imagekit.io/intmarket/icons8-delivery-time-100.png?updatedAt=1766535705033"
+                                alt="">
+                        </div>
+                        <div class="footer-info-item-content-container">
+                            <p class="lato-text text rhino-text">{{app_settings.hours}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-menu-items-container">
+                <div class="footer-menu-category-container">
+                    <h1 class="sub-title quicksand-text rhino-text">Account</h1>
+                    <div class="footer-menu-items-content-container">
+                        <a href="{{ '/my-account/' if current_customer else '/login' }}"
+                            class="pc-third-ribbon-menu-link rhino-text text lato-text">My Account</a>
+                        <a href="{{ '/cart/' if current_customer else '/login' }}"
+                            class="pc-third-ribbon-menu-link rhino-text text lato-text">View Cart</a>
+                        <a href="{{ '/wishlist/' if current_customer else '/login' }}"
+                            class="pc-third-ribbon-menu-link rhino-text text lato-text">My Wishlist</a>
+                        <a href="/#popular-products" class="pc-third-ribbon-menu-link rhino-text text lato-text">Popular
+                            Products</a>
+                        <a href="/cart#recently-viewed"
+                            class="pc-third-ribbon-menu-link rhino-text text lato-text">Recently Viewed</a>
+                        <a href="/#hot-deals" class="pc-third-ribbon-menu-link rhino-text text lato-text">Deals</a>
+                        <a href="/#hot-deals" class="pc-third-ribbon-menu-link rhino-text text lato-text">Hot deals</a>
+                    </div>
+                </div>
+                <div class="footer-menu-category-container">
+                    <h1 class="sub-title quicksand-text rhino-text">Company</h1>
+                    <div class="footer-menu-items-content-container">
+                        <a href="/about-us/" class="pc-third-ribbon-menu-link rhino-text text lato-text">About Us</a>
+                        <a href="/refund-and-return-policy/"
+                            class="pc-third-ribbon-menu-link rhino-text text lato-text">Refund and Return Policy</a>
+                        <a href="/privacy-policy/" class="pc-third-ribbon-menu-link rhino-text text lato-text">Privacy
+                            Policy</a>
+                        <a href="/terms-and-conditions/"
+                            class="pc-third-ribbon-menu-link rhino-text text lato-text">Terms and Conditions</a>
+                        <a href="/contact-us/" class="pc-third-ribbon-menu-link rhino-text text lato-text">Contact
+                            Us</a>
+                        <a href="/suggest-product/" class="pc-third-ribbon-menu-link rhino-text text lato-text">Suggest
+                            a Product</a>
+                        <a href="/help-center/" class="pc-third-ribbon-menu-link rhino-text text lato-text">Help
+                            center</a>
+                    </div>
+                </div>
+                <div class="footer-menu-category-container">
+                    <h1 class="sub-title quicksand-text rhino-text">Shop by Categories</h1>
+                    <div class="footer-menu-items-content-container">
+                        {% for cat in mega_parent_categories %}
+                        <a href="/subcategories/?category_name={{ cat.slug }}"
+                            class="pc-third-ribbon-menu-link rhino-text lato-text text">
+                            {{ cat.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="footer-menu-category-container">
+                    <h1 class="sub-title quicksand-text rhino-text">Featured Categories</h1>
+                    <div class="footer-menu-items-content-container">
+                        {% for sub in mega_featured_subcategories %}
+                        <a href="/search-results/?category_name={{ sub.slug }}"
+                            class="pc-third-ribbon-menu-link rhino-text lato-text text">
+                            {{ sub.name }}
+                        </a>
+                        {% endfor %}
+
+                        <a href="/#featured-categories" class="pc-third-ribbon-menu-link rhino-text lato-text text">
+                            View All Featured Categories
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-ending-section">
+            <p class="lato-text text gray-text">&copy; International Market - All Rights Reserved</p>
+        </div>
+    </footer>
+</body>
+
+</html>

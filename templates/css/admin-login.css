@@ -1,0 +1,101 @@
+.admin-auth-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 30px 0 60px 0;
+}
+
+.admin-auth-card {
+    width: min(520px, 92%);
+    border: 1px solid var(--gray-line, #d8d8d8);
+    border-radius: 18px;
+    padding: 26px;
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.admin-auth-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.admin-auth-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--gray-line, #d8d8d8);
+    border-radius: 12px;
+    outline: none;
+}
+
+.admin-auth-input:focus {
+    border-color: var(--ocean-green, #18a567);
+    box-shadow: 0 0 0 4px rgba(24, 165, 103, 0.12);
+}
+
+.admin-auth-actions {
+    margin-top: 18px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.admin-auth-btn {
+    border: none;
+    cursor: pointer;
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: var(--ocean-green, #18a567);
+    color: #fff;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.admin-auth-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);
+}
+
+.admin-auth-error {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(229, 57, 53, 0.08);
+    border: 1px solid rgba(229, 57, 53, 0.25);
+    color: #e53935;
+}
+
+.admin-required {
+    color: #e53935;
+    margin-left: 6px;
+}
+
+.admin-auth-hint {
+    margin-top: 16px;
+    opacity: 0.85;
+}
+
+.admin-dashboard-grid {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.admin-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    padding: 18px 12px;
+    border-radius: 16px;
+    border: 1px solid var(--gray-line, #d8d8d8);
+    background: #f7f7f7;
+    color: inherit;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.admin-tile:hover {
+    transform: translateY(-1px);
+    border-color: var(--ocean-green, #18a567);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+}

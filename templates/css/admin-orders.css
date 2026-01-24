@@ -1,0 +1,430 @@
+/* ============================= */
+/* Shared containers */
+/* ============================= */
+
+.ord-page-wrap,
+.ord-search-wrap,
+.ord-results-wrap,
+.ord-details-wrap {
+    width: 92%;
+    margin: 0 auto;
+    padding: 22px 0 70px 0;
+}
+
+/* ============================= */
+/* Top header row */
+/* ============================= */
+
+.ord-page-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.ord-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.ord-action-btn {
+    text-decoration: none;
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--gray-line, #d8d8d8);
+    background: #fff;
+    color: inherit;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    white-space: nowrap;
+}
+
+.ord-action-btn:hover {
+    transform: translateY(-1px);
+    border-color: var(--ocean-green, #18a567);
+    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.10);
+}
+
+/* ============================= */
+/* Error box */
+/* ============================= */
+
+.ord-error {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(229, 57, 53, 0.30);
+    background: rgba(229, 57, 53, 0.08);
+    color: #e53935;
+    margin: 12px 0 16px 0;
+}
+
+/* ============================= */
+/* Blocks on Open Orders page */
+/* ============================= */
+
+.ord-block {
+    margin-top: 16px;
+}
+
+.ord-block-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 10px 0 10px 0;
+}
+
+/* Empty state */
+.ord-empty {
+    border: 1px dashed var(--gray-line, #d8d8d8);
+    border-radius: 18px;
+    background: #fafafa;
+    padding: 28px 18px;
+}
+
+/* ============================= */
+/* Forms */
+/* ============================= */
+
+.ord-form {
+    border: 1px solid var(--gray-line, #d8d8d8);
+    border-radius: 18px;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.ord-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--gray-line, #d8d8d8);
+    border-radius: 14px;
+    outline: none;
+    background: #fff;
+}
+
+.ord-input:focus {
+    border-color: var(--ocean-green, #18a567);
+    box-shadow: 0 0 0 4px rgba(24, 165, 103, 0.12);
+}
+
+.ord-hint {
+    opacity: 0.85;
+    margin-top: 6px;
+}
+
+/* ============================= */
+/* Table */
+/* ============================= */
+
+.ord-table-wrap {
+    border: 1px solid var(--gray-line, #d8d8d8);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.ord-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ord-table thead th {
+    text-align: left;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background: #fcfcfc;
+}
+
+.ord-table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.ord-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Clickable rows */
+.ord-row-link {
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+
+.ord-row-link:hover {
+    background: rgba(59, 183, 126, 0.06);
+}
+
+.ord-footnote {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    background: #fff;
+    opacity: 0.9;
+}
+
+/* ============================= */
+/* Status colors */
+/* ============================= */
+
+.ord-status {
+    font-weight: 700;
+    text-transform: lowercase;
+}
+
+.ord-status-pending {
+    color: #f9a825;
+}
+
+/* amber */
+.ord-status-confirmed {
+    color: #1976d2;
+}
+
+/* blue */
+.ord-status-packed {
+    color: #6d4c41;
+}
+
+/* brown */
+.ord-status-out_for_delivery {
+    color: #8e24aa;
+}
+
+/* purple */
+.ord-status-delivered {
+    color: #2e7d32;
+}
+
+/* green */
+.ord-status-canceled {
+    color: #616161;
+}
+
+/* grey */
+
+/* ============================= */
+/* Details card */
+/* ============================= */
+
+.ord-card {
+    border: 1px solid var(--gray-line, #d8d8d8);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.05);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ord-strong {
+    font-weight: 800;
+}
+
+/* key-value grid */
+.ord-kv-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.ord-kv {
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 14px;
+    padding: 12px 14px;
+    background: #fcfcfc;
+}
+
+/* 2-column split panels */
+.ord-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.ord-panel {
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 16px;
+    padding: 14px;
+    background: #fff;
+}
+
+/* pricing list */
+.ord-price-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.ord-price-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.ord-price-total {
+    font-weight: 800;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    padding-top: 10px;
+}
+
+/* items table wrapper */
+.ord-items-table-wrap {
+    margin-top: 10px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* timeline */
+.ord-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.ord-tl-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: #fcfcfc;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* notes */
+.ord-notes {
+    white-space: pre-wrap;
+    background: #fcfcfc;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 12px 14px;
+    border-radius: 14px;
+    overflow: auto;
+}
+
+/* ============================= */
+/* Admin controls */
+/* ============================= */
+
+.ord-controls {
+    border-color: rgba(59, 183, 126, 0.20);
+    background: rgba(59, 183, 126, 0.03);
+}
+
+.ord-message-box {
+    width: 100%;
+    min-height: 140px;
+    resize: vertical;
+    padding: 12px 14px;
+    border: 1px solid var(--gray-line, #d8d8d8);
+    border-radius: 14px;
+    outline: none;
+    background: #fff;
+    margin-top: 10px;
+}
+
+.ord-message-box:focus {
+    border-color: var(--ocean-green, #18a567);
+    box-shadow: 0 0 0 4px rgba(24, 165, 103, 0.12);
+}
+
+.ord-btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.ord-inline-form {
+    margin: 0;
+}
+
+/* primary button (same feel as other modules) */
+.ord-primary-btn {
+    border: none;
+    cursor: pointer;
+    padding: 12px 18px;
+    border-radius: 14px;
+    background: var(--ocean-green, #18a567);
+    color: #fff;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    width: fit-content;
+}
+
+.ord-primary-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.12);
+}
+
+.ord-primary-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* danger button */
+.ord-danger-btn {
+    border: 1px solid rgba(229, 57, 53, 0.35);
+    background: rgba(229, 57, 53, 0.10);
+    color: #e53935;
+    padding: 12px 18px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    width: fit-content;
+}
+
+.ord-danger-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.10);
+    background: rgba(229, 57, 53, 0.16);
+}
+
+.ord-danger-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ============================= */
+/* Responsive */
+/* ============================= */
+
+@media (max-width: 900px) {
+    .ord-page-top {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ord-kv-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ord-split {
+        grid-template-columns: 1fr;
+    }
+
+    .ord-btn-row {
+        grid-template-columns: 1fr;
+    }
+
+    .ord-primary-btn,
+    .ord-danger-btn {
+        width: 100%;
+    }
+
+    /* tables: keep standard layout; if you want stacked mobile rows later, tell me */
+}

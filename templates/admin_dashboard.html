@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{page_title}}</title>
+    <link rel="stylesheet" href="/css/admin-main.css">
+    <link rel="stylesheet" href="/css/admin-login.css">
+</head>
+
+<body>
+    <header class="admin-section admin-header">
+        <div class="admin-header-home-button">
+            <a href="/core/ops/admin/dashboard" class="quicksand-text white-text text">Home</a>
+        </div>
+        <div class="admin-header-home-button">
+            <a target="_blank" href="/" class="quicksand-text white-text text">Go to Store</a>
+        </div>
+        <div class="admin-header-logout-button">
+            <a href="/core/ops/admin/logout" class="quicksand-text white-text text">Signout</a>
+        </div>
+    </header>
+    <section class="admin-section admin-page-title">
+        <h1 class="rhino-text quicksand-text title">Admin Panel</h1>
+    </section>
+    <script>
+        (async function adminGuard() {
+            try {
+                // Call auth check endpoint (cookie is sent automatically by browser)
+                const res = await fetch("/core/ops/admin/api/auth/check", {
+                    method: "GET",
+                    credentials: "same-origin",
+                    cache: "no-store",
+                });
+
+                if (!res.ok) {
+                    // Not logged in → send to admin login
+                    window.location.replace("/core/ops/admin/login");
+                    return;
+                }
+            } catch (err) {
+                // If server unreachable or anything weird → safer to go login
+                window.location.replace("/core/ops/admin/login");
+            }
+        })();
+    </script>
+    <section class="admin-section">
+        <div class="admin-auth-wrap">
+            <div class="admin-auth-card">
+                <h2 class="rhino-text quicksand-text sub-title">Dashboard</h2>
+                <p class="lato-text text gray-text">
+                    Logged in as <span style="font-weight:700;">{{ admin.username }}</span>
+                </p>
+                <div class="admin-dashboard-grid">
+                    <a class="admin-tile quicksand-text text" href="/core/ops/admin/dashboard/look-up-product">
+                        Manage Products
+                    </a>
+                    <a class="admin-tile quicksand-text text" href="/core/ops/admin/dashboard/manage-coupon-codes">
+                        Manage Coupon Codes
+                    </a>
+                    <a class="admin-tile quicksand-text text" href="/core/ops/admin/dashboard/all-open-orders/">
+                        Manage Orders
+                    </a>
+                    <a class="admin-tile quicksand-text text" href="/core/ops/admin/dashboard/recent-transactions/">
+                        Manage Transactions
+                    </a>
+                    <a class="admin-tile quicksand-text text" href="/core/ops/admin/dashboard/look-up-customer">
+                        Manage Customers
+                    </a>
+                    <a class="admin-tile quicksand-text text" href="/core/ops/admin/dashboard/all-categories">
+                        Manage Categories
+                    </a>
+                    <a class="admin-tile quicksand-text text" href="/core/ops/admin/dashboard/shipping-fee">
+                        Shipping Fee
+                    </a>
+                    <a class="admin-tile quicksand-text text" href="/core/ops/admin/dashboard/app-settings">
+                        Application Settings
+                    </a>
+                    <a class="admin-tile quicksand-text text" href="/core/ops/admin/dashboard/analytics">
+                        Analytics
+                    </a>
+                    <a class="admin-tile quicksand-text text" href="/core/ops/admin/dashboard/all-messages/">
+                        Message Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

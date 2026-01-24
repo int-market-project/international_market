@@ -1,0 +1,224 @@
+.home-banner-section {
+    width: 100%;
+    padding: 0 0 0 5%;
+    background-image: url("https://themepanthers.com/wp/nest/d1/wp-content/uploads/2022/02/banner-10-min.png");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 20px 20px 20px 20px !important;
+}
+
+.home-banner-content-container h1 {
+    width: 100%;
+}
+
+.home-banner-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.home-banner-content-container {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.home-banner-image-container {
+    width: 40%;
+    justify-content: right;
+    text-align: right;
+}
+
+.home-banner-image-container img {
+    width: 100%;
+    justify-content: right;
+    text-align: right;
+}
+
+.home-banner-content-container p {
+    line-height: 1.5;
+    width: 70%;
+}
+
+.home-banner-content-container a {
+    background: var(--ocean-green);
+    color: white;
+    padding: 10px 20px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    border-radius: 3px;
+    width: fit-content;
+}
+
+.home-banner-content-container a:hover {
+    background: var(--yellow-orange);
+}
+
+@media (max-width: 900px) {
+    .home-banner-section {
+        padding: 20px 5% 0 5%;
+    }
+
+    .home-banner-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .home-banner-image-container,
+    .home-banner-content-container {
+        width: 100%;
+    }
+
+    .home-banner-content-container p {
+        width: 100%;
+    }
+
+    .home-banner-content-container h1 {
+        font-size: 36px;
+    }
+}
+
+.all-categories-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    /* ✅ no wrapping */
+    gap: 20px;
+
+    overflow-x: auto;
+    /* ✅ horizontal scroll */
+    overflow-y: hidden;
+
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+
+    cursor: grab;
+    /* ✅ grab cursor */
+    padding-bottom: 20px;
+    /* keeps the same spacing feel as your old margin-bottom */
+}
+
+/* Hide scrollbar (still scrollable) */
+.all-categories-container::-webkit-scrollbar {
+    display: none;
+}
+
+.all-categories-container {
+    scrollbar-width: none;
+}
+
+/* While dragging */
+.all-categories-container.is-dragging {
+    cursor: grabbing;
+    user-select: none;
+}
+
+/* Make cards a consistent width in a horizontal row */
+.category-container {
+    flex: 0 0 auto;
+    width: 10%;
+}
+
+/* ✅ Keep your existing styles */
+.category-container a {
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid var(--gray-line);
+    background-color: #ecffec;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 0;
+    /* ✅ IMPORTANT: in horizontal mode, this creates weird extra space */
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s ease;
+}
+
+.category-container a:hover {
+    border-color: var(--ocean-green);
+    box-shadow:
+        0 0 0 1px rgba(47, 179, 109, 0.35),
+        0 12px 28px rgba(0, 0, 0, 0.10);
+    transform: translateY(-4px);
+}
+
+.category-image-container,
+.category-image-container img {
+    width: 100%;
+}
+
+.category-content-container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+/* ✅ Mobile / Tablet (900px or less) */
+@media (max-width: 900px) {
+
+    /* Make the horizontal scroller feel better on mobile */
+    .all-categories-container {
+        gap: 14px;
+        padding-bottom: 14px;
+        padding-left: 8px;
+        padding-right: 8px;
+        scroll-snap-type: x mandatory;
+        /* nice snapping */
+    }
+
+    /* Bigger cards (so they don't look tiny on mobile) */
+    .category-container {
+        flex: 0 0 auto;
+        width: 160px;
+        /* fixed card width works best for horizontal scroll */
+        scroll-snap-align: start;
+    }
+
+    /* Slightly tighter card padding for small screens */
+    .category-container a {
+        padding: 14px;
+        border-radius: 18px;
+    }
+
+    /* Image sizing consistency */
+    .category-image-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .category-image-container img {
+        width: 100%;
+        max-width: 92px;
+        /* keeps icon nicely sized */
+        height: auto;
+    }
+
+    /* Text sizes: readable but compact */
+    .category-content-container {
+        gap: 6px;
+    }
+
+    .category-content-container h1 {
+        font-size: 16px;
+        line-height: 1.15;
+    }
+
+    .category-content-container p {
+        font-size: 14px;
+        line-height: 1.1;
+    }
+}
