@@ -4,6 +4,7 @@ import uuid
 import secrets
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
+from uuid import uuid4
 
 import certifi
 from pymongo import MongoClient, ReturnDocument
@@ -4776,6 +4777,7 @@ def build_order_details_view(order_doc: dict) -> dict:
 
 def delete_session_by_id(session_id: str) -> None:
     database["sessions"].delete_one({"session_id": session_id})
+
 
 
 
