@@ -30,6 +30,7 @@ from schemas import *
 from database import *
 from methods import send_email
 
+load_dotenv()
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "").strip()
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "").strip()
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "http://localhost:8001").strip()
@@ -3669,6 +3670,7 @@ async def admin_api_reply_message(
 
     # 3) Go back to unreplied messages list (page reload)
     return RedirectResponse(url="/core/ops/admin/dashboard/all-messages/", status_code=302)
+
 
 
 
