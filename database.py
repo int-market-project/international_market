@@ -4,6 +4,7 @@ import uuid
 import secrets
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
+import uuid
 from uuid import uuid4
 
 import certifi
@@ -1742,7 +1743,6 @@ def get_cart_product_ids_set(customer_id: int) -> set[int]:
             pass
     return out
 
-
 def _to_float(v: Any, default: float = 0.0) -> float:
     try:
         if v is None:
@@ -1802,19 +1802,11 @@ def get_wishlist_qty(customer_id: int) -> int:
 def get_featured_categories_with_counts() -> List[Dict[str, Any]]:
     """
     Returns featured categories with product counts.
-
-    Category doc example:
-      { slug: "fresh-produce", is_featured: True, image_url: "..." }
-
-    Product doc example:
-      { sub_category_id: "fresh-produce", ... }
-
-    So product count uses: products.sub_category_id == category.slug
     """
 
     featured_cursor = categories.find(
         {"is_featured": True},
-        {"_id": 0, "name": 1, "slug": 1, "image_url": 1}
+        {"_id": 0, "name": 1, "slug": 1, "image_url": 1, "parent_id": 1}
     )
 
     results: List[Dict[str, Any]] = []
@@ -1829,42 +1821,9 @@ def get_featured_categories_with_counts() -> List[Dict[str, Any]]:
         results.append({
             "name": c.get("name", "") or "",
             "slug": slug,
+            "parent_slug": c.get("parent_id", "") or "",
             "items_count": int(items_count),
             "image_url": c.get("image_url", "") or "",
-        })
-
-    return results
-    """
-    Returns a list of featured categories with product counts.
-
-    Output fields:
-      - name
-      - slug
-      - items_count
-      - image_url
-    """
-
-    # 1) get featured categories
-    featured_cats_cursor = categories.find(
-        {"is_featured": True},
-        {"_id": 0, "name": 1, "slug": 1, "image_url": 1}
-    )
-
-    results: List[Dict[str, Any]] = []
-
-    for cat in featured_cats_cursor:
-        slug = (cat.get("slug") or "").strip()
-        if not slug:
-            continue
-
-        # 2) count products in this category (products.category_id is the category slug)
-        items_count = products.count_documents({"category_id": slug})
-
-        results.append({
-            "name": cat.get("name", "") or "",
-            "slug": slug,
-            "items_count": int(items_count),
-            "image_url": cat.get("image_url", "") or "",
         })
 
     return results
@@ -1872,19 +1831,11 @@ def get_featured_categories_with_counts() -> List[Dict[str, Any]]:
 def get_subcategories_with_counts(parent_category_slug: str) -> List[Dict[str, Any]]:
     """
     Returns subcategories of a given parent category with product counts.
-
-    Subcategory doc example:
-      { slug: "fruits", parent_id: "fresh-produce", image_url: "..." }
-
-    Product doc example:
-      { sub_category_id: "fruits", ... }
-
-    So product count uses: products.sub_category_id == subcategory.slug
     """
 
     subcategories_cursor = categories.find(
         {"parent_id": parent_category_slug},
-        {"_id": 0, "name": 1, "slug": 1, "image_url": 1}
+        {"_id": 0, "name": 1, "slug": 1, "image_url": 1, "parent_id": 1}
     )
 
     results: List[Dict[str, Any]] = []
@@ -1899,6 +1850,7 @@ def get_subcategories_with_counts(parent_category_slug: str) -> List[Dict[str, A
         results.append({
             "name": subcat.get("name", "") or "",
             "slug": slug,
+            "parent_slug": subcat.get("parent_id", "") or "",
             "items_count": int(items_count),
             "image_url": subcat.get("image_url", "") or "",
         })
@@ -2402,22 +2354,24 @@ def empty_cart(customer_id: int) -> bool:
 
 TAX_RATE_MD = 0.06
 
-def compute_totals(subtotal: float, discount_amount: float) -> dict:
+def compute_totals(subtotal: float, discount_amount: float, shipping_fee: float = 0.0) -> dict:
     subtotal = float(max(0.0, _to_float(subtotal)))
     discount_amount = float(max(0.0, _to_float(discount_amount)))
+    shipping_fee = float(max(0.0, _to_float(shipping_fee)))
 
     if discount_amount > subtotal:
         discount_amount = subtotal
 
     discounted_subtotal = subtotal - discount_amount
     tax = discounted_subtotal * TAX_RATE_MD
-    total = discounted_subtotal + tax
+    total = discounted_subtotal + tax + shipping_fee
 
     return {
         "subtotal": round(subtotal, 2),
         "discount_amount": round(discount_amount, 2),
         "discounted_subtotal": round(discounted_subtotal, 2),
         "tax": round(tax, 2),
+        "shipping_fee": round(shipping_fee, 2),
         "total": round(total, 2),
     }
 
@@ -2509,6 +2463,63 @@ def validate_coupon_for_subtotal(code: str, customer_id: int, subtotal: float) -
             "audience": coupon.get("audience", "all"),
         }
     }
+
+def mark_coupon_used(code: str, customer_id: int) -> dict:
+    """
+    Marks coupon as used by this customer (atomic).
+    Enforces:
+      - one-time per customer (customer_ids_who_used)
+      - max_uses_total (uses_total < max_uses_total when max_uses_total > 0)
+    """
+    code = (code or "").strip().upper()
+    if not code:
+        return {"ok": False, "message": "Missing coupon code."}
+
+    try:
+        customer_id = int(customer_id)
+    except (TypeError, ValueError):
+        return {"ok": False, "message": "Invalid customer id."}
+
+    now = datetime.utcnow()
+
+    # Atomic update:
+    # - only succeeds if customer_id not already used
+    # - and max_uses_total not exceeded (or max_uses_total == 0 meaning unlimited)
+    query = {
+        "code": code,
+        "customer_ids_who_used": {"$ne": customer_id},
+        "$or": [
+            {"max_uses_total": {"$lte": 0}},
+            {"$expr": {"$lt": ["$uses_total", "$max_uses_total"]}},
+        ],
+    }
+
+    update = {
+        "$inc": {"uses_total": 1},
+        "$push": {"customer_ids_who_used": customer_id},
+        "$set": {"updated_at": now},
+    }
+
+    res = coupon_codes.update_one(query, update)
+
+    if res.modified_count == 1:
+        return {"ok": True, "message": "Coupon marked as used."}
+
+    # If update failed, figure out why (optional but helpful)
+    coupon = coupon_codes.find_one({"code": code}, {"_id": 0, "uses_total": 1, "max_uses_total": 1, "customer_ids_who_used": 1})
+    if not coupon:
+        return {"ok": False, "message": "Invalid coupon."}
+
+    used_ids = coupon.get("customer_ids_who_used") or []
+    if customer_id in [int(x) for x in used_ids if str(x).isdigit()]:
+        return {"ok": False, "message": "You have already used this coupon."}
+
+    max_uses_total = int(coupon.get("max_uses_total", 0) or 0)
+    uses_total = int(coupon.get("uses_total", 0) or 0)
+    if max_uses_total > 0 and uses_total >= max_uses_total:
+        return {"ok": False, "message": "This coupon has reached its maximum number of uses."}
+
+    return {"ok": False, "message": "Coupon cannot be marked as used."}
 
 def get_product_details(product_id: int, customer_id: int | None = None) -> dict | None:
     """
@@ -4777,7 +4788,6 @@ def build_order_details_view(order_doc: dict) -> dict:
 
 def delete_session_by_id(session_id: str) -> None:
     database["sessions"].delete_one({"session_id": session_id})
-
 
 
 
