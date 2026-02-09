@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{page_title}}</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <link rel="stylesheet" href="/css/policy-pages.css">
+
+    <script>
+        (function () {
+            const SITE_COOKIE = "site_lang";
+            const DAYS = 2;
+
+            function setCookie(name, value, days) {
+                const d = new Date();
+                d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+                document.cookie = `${name}=${encodeURIComponent(value)}; expires=${d.toUTCString()}; path=/; SameSite=Lax`;
+            }
+
+            function getCookie(name) {
+                const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+                return m ? decodeURIComponent(m[1]) : null;
+            }
+
+            // Default Spanish if no cookie
+            let lang = getCookie(SITE_COOKIE);
+            if (!lang) {
+                lang = "es";
+                setCookie(SITE_COOKIE, lang, DAYS);
+            }
+
+            // Force Google Translate cookie BEFORE widget runs
+            const source = "en";
+            const target = (lang === "en") ? "en" : "es";
+
+            document.cookie = `googtrans=/${source}/${target}; path=/; SameSite=Lax`;
+            document.cookie = `googtrans=/${source}/${target}; domain=${location.hostname}; path=/; SameSite=Lax`;
+
+            window.__LANG_HELPERS__ = { setCookie, getCookie, SITE_COOKIE, DAYS };
+
+            // Keep generator positioning: bottom-right floating
+            window.gtranslateSettings = {
+                default_language: "en",
+                native_language_names: true,
+                languages: ["en", "es"],
+                wrapper_selector: ".gtranslate_wrapper",
+                horizontal_position: "right",
+                vertical_position: "bottom"
+            };
+        })();
+    </script>
+    <script src="https://cdn.gtranslate.net/widgets/latest/dropdown.js" defer></script>
+
+</head>
+
+<body>
+    <header>
+        <div id="pc-header-container">
+            <div class="pc-first-ribbon-header">
+                <div class="pc-first-ribbon-left-container">
+                    <div><a href="/about-us/" class="gray-text text lato-text">About Us</a></div>
+                    <div>
+                        <p class="gray-text text lato-text">|</p>
+                    </div>
+                    <div><a href="{{ '/my-account/' if current_customer else '/login' }}"
+                            class="gray-text text lato-text">My Account</a></div>
+                    <div>
+                        <p class="gray-text text lato-text">|</p>
+                    </div>
+                    <div><a href="{{ '/wishlist/' if current_customer else '/login' }}"
+                            class="gray-text text lato-text">Wishlist</a></div>
+                    <div>
+                        <p class="gray-text text lato-text">|</p>
+                    </div>
+                    <div><a href="/help-center/" class="gray-text text lato-text">Help center</a></div>
+                </div>
+                <div class="pc-first-ribbon-middle-container">
+                    <a href="/#hot-deals" class="pc-banner-link ocean-green-text text lato-text">
+                        <span class="pc-banner-text">
+                            Flash Deals Are Live — Steal the Best Offers Now!
+                        </span>
+                    </a>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const messages = [
+                            "Flash Deals Are Live — Steal the Best Offers Now!",
+                            "Mega Discounts Today — Shop Before Stocks Run Out!",
+                            "Fresh Deals Every Day — Shop & Save More",
+                            "Super Value Deals — Save More Every Day",
+                            "Exclusive Offers Live Now — Don’t Miss Out"
+                        ];
+
+                        const textEls = document.querySelectorAll('.pc-banner-text');
+                        if (!textEls.length) return;
+
+                        let idx = 0;
+
+                        function showMessage(i) {
+                            textEls.forEach(el => {
+                                el.textContent = messages[i];
+                                el.classList.add('is-visible');
+                            });
+                        }
+
+                        function hideMessage() {
+                            textEls.forEach(el => {
+                                el.classList.remove('is-visible');
+                            });
+                        }
+
+                        // first line
+                        showMessage(idx);
+
+                        setInterval(function () {
+                            hideMessage();
+                            setTimeout(function () {
+                                idx = (idx + 1) % messages.length;
+                                showMessage(idx);
+                            }, 400); // match CSS transition
+                        }, 2000); // each line stays ~2 seconds
+                    });
+                </script>
+                <div class="pc-first-ribbon-right-container">
+                    <p class="gray-text text lato-text">
+                        Need help? Call Us:
+                        <a href="tel:{{app_settings.number_to_give}}"
+                            class="ocean-green-text">{{app_settings.number_to_show}}</a>
+                    </p>
+                </div>
+            </div>
+            <div class="pc-second-ribbon-header">
+                <div class="pc-second-ribbon-logo-container">
+                    <a href="/"><img src="https://ik.imagekit.io/intmarket/logo.png?updatedAt=1763862184023" alt=""></a>
+                </div>
+                <div class="pc-second-ribbon-search-bar-container" data-global-search="1">
+                    <div class="pc-search-bar">
+                        <input id="globalKeywordPc" class="gray-text text lato-text" type="text"
+                            placeholder="Search for products...">
+                        <a id="globalSearchBtnPc" href="/search-results/" class="gray-text text lato-text">Search</a>
+                    </div>
+                </div>
+                <div class="pc-second-ribbon-buttons-container">
+                    <a href="{{ '/wishlist/' if current_customer else '/login' }}"
+                        class="pc-second-ribbon-button-container">
+                        <div class="pc-second-ribbon-button-container-div">
+                            <div class="pc-second-ribbon-button-image-container">
+                                <div class="pc-second-ribbon-button-image">
+                                    <img src="https://ik.imagekit.io/intmarket/wishlist.png?updatedAt=1763862183984"
+                                        alt="">
+                                </div>
+                                <div class="pc-second-ribbon-button-number">
+                                    <p id="wishlist-qty-pc" class="ocean-green-text text quicksand-text">{{ wishlist_qty
+                                        }}</p>
+                                </div>
+                            </div>
+                            <div class="pc-second-ribbon-button-name-container">
+                                <p class="gray-text text lato-text">Wishlist</p>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="{{ '/cart/' if current_customer else '/login' }}"
+                        class="pc-second-ribbon-button-container">
+                        <div class="pc-second-ribbon-button-container-div">
+                            <div class="pc-second-ribbon-button-image-container">
+                                <div class="pc-second-ribbon-button-image">
+                                    <img src="https://ik.imagekit.io/intmarket/cart.png?updatedAt=1763862183972" alt="">
+                                </div>
+                                <div class="pc-second-ribbon-button-number">
+                                    <p id="cart-qty-pc" class="ocean-green-text text quicksand-text">{{ cart_qty }}</p>
+                                </div>
+                            </div>
+                            <div class="pc-second-ribbon-button-name-container">
+                                <p class="gray-text text lato-text">Cart</p>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="{{ '/my-account/' if current_customer else '/login' }}"
+                        class="pc-second-ribbon-button-container">
+                        <div class="pc-second-ribbon-button-container-div">
+                            <div class="pc-second-ribbon-button-image-container">
+                                <div class="pc-second-ribbon-button-image">
+                                    <img src="https://ik.imagekit.io/intmarket/user.png?updatedAt=1763862183956" alt="">
+                                </div>
+                            </div>
+                            <div class="pc-second-ribbon-button-name-container">
+                                <p class="gray-text text lato-text">Account</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="pc-third-ribbon-header">
+                <div class="pc-third-ribbon-buttons-container">
+                    <div class="pc-menu-categories-wrapper">
+                        <button class="pc-menu-categories-button">
+                            <div class="categories-button-image-container">
+                                <img src="https://ik.imagekit.io/intmarket/apps.png?updatedAt=1763862183985" alt="">
+                            </div>
+                            <p class="white-text text quicksand-text">Browse All Categories</p>
+                            <div class="categories-button-arrow-container">
+                                <span class="categories-button-arrow">&#9662;</span> <!-- down arrow -->
+                            </div>
+                        </button>
+                        <div class="pc-menu-categories-dropdown">
+                            {% for category in parent_categories %}
+                            <div class="pc-menu-category-button-container">
+                                <a href="/subcategories/?category_name={{ category.slug }}"
+                                    class="pc-menu-category-button">
+                                    {% if category.image_url %}
+                                    <div class="category-button-image-container">
+                                        <img src="{{ category.image_url }}" alt="{{ category.name }}">
+                                    </div>
+                                    {% endif %}
+                                    <p class="rhino-text text quicksand-text">
+                                        {{ category.name }}
+                                    </p>
+                                    <div class="category-button-quantity-container">
+                                        <p class="white-text text quicksand-text">
+                                            {{ category.subcategory_count }}
+                                        </p>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const wrapper = document.querySelector('.pc-menu-categories-wrapper');
+                                if (!wrapper) return;
+
+                                const button = wrapper.querySelector('.pc-menu-categories-button');
+
+                                // Toggle open/close on button click
+                                button.addEventListener('click', function (e) {
+                                    e.stopPropagation(); // don't let the click bubble to document
+                                    wrapper.classList.toggle('is-open');
+                                });
+
+                                // Close when clicking anywhere else
+                                document.addEventListener('click', function (e) {
+                                    if (!wrapper.contains(e.target)) {
+                                        wrapper.classList.remove('is-open');
+                                    }
+                                });
+                            });
+                        </script>
+                    </div>
+                    <div class="pc-menu-hot-deals-button">
+                        <a href="/#hot-deals" class="pc-second-ribbon-button-container">
+                            <div class="pc-second-ribbon-button-container-div">
+                                <div class="pc-second-ribbon-button-image-container">
+                                    <div class="pc-second-ribbon-button-image">
+                                        <img src="https://ik.imagekit.io/intmarket/flame.png?updatedAt=1763862183933"
+                                            alt="">
+                                    </div>
+                                </div>
+                                <div class="pc-second-ribbon-button-name-container">
+                                    <p class="rhino-text text quicksand-text">Hot Deals</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="pc-third-ribbon-menu-container">
+                    <div class="pc-third-ribbon-menu-item">
+                        <a href="/" class="pc-third-ribbon-menu-link rhino-text text quicksand-text">Home</a>
+                    </div>
+                    <div class="pc-third-ribbon-menu-item">
+                        <a href="/about-us/" class="pc-third-ribbon-menu-link rhino-text text quicksand-text">About
+                            Us</a>
+                    </div>
+                    <div class="pc-third-ribbon-menu-item pc-has-mega">
+                        <button type="button"
+                            class="pc-mega-trigger pc-third-ribbon-mega-menu-link rhino-text text quicksand-text">
+                            Shop
+                            <span class="pc-mega-arrow">&#9662;</span>
+                        </button>
+                        <div class="pc-mega-dropdown">
+                            <div class="pc-dropdown-content-container">
+                                <h1 class="ocean-green-text quicksand-text sub-title">Shop by Categories</h1>
+
+                                {% for cat in mega_parent_categories %}
+                                <a href="/subcategories/?category_name={{ cat.slug }}"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">
+                                    {{ cat.name }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                            <div class="pc-dropdown-content-container">
+                                <h1 class="ocean-green-text quicksand-text sub-title">Featured Categories</h1>
+
+                                {% for sub in mega_featured_subcategories %}
+                                <a href="/search-results/?category={{ sub.parent_slug }}&subcategory={{ sub.slug }}&min_price=0&max_price=1000&hot_deal=true&popular=true&sort=default"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">
+                                    {{ sub.name }}
+                                </a>
+                                {% endfor %}
+
+                                <a href="/#featured-categories"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">
+                                    View All Featured Categories
+                                </a>
+                            </div>
+                            <div class="pc-dropdown-content-container">
+                                <h1 class="ocean-green-text quicksand-text sub-title">Store Tools</h1>
+                                <a href="{{ '/wishlist/' if current_customer else '/login' }}"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">Wishlist</a>
+                                <a href="{{ '/cart/' if current_customer else '/login' }}"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">Cart</a>
+                                <a href="/#popular-products"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">Popular
+                                    Products</a>
+                                <a href="/#hot-deals" class="pc-third-ribbon-menu-link gray-text lato-text text">Hot
+                                    Deals</a>
+                                <a href="/#new-arrivals" class="pc-third-ribbon-menu-link gray-text lato-text text">New
+                                    Arrivals</a>
+                                <a href="/cart#recently-viewed"
+                                    class="pc-third-ribbon-menu-link gray-text lato-text text">Recently
+                                    Viewed</a>
+                            </div>
+                            <div class="pc-dropdown-last-container">
+                                <h1 class="ocean-green-text quicksand-text text">Fresh Arrivals</h1>
+                                <h1 class="rhino-text sub-title quicksand-text">Today’s Freshly Stocked Produce</h1>
+                                <div class="pc-dropdown-last-container-image-container">
+                                    <div class="pc-dropdown-last-container-image-container-button">
+                                        <a href="/#hot-deals" class="white-text text quicksand-text">Shop Fresh</a>
+                                    </div>
+                                    <div class="pc-dropdown-last-container-image-container-image">
+                                        <img src="https://ik.imagekit.io/intmarket/top-half-view-circle-shape-hot-peppers-cherry-tomatoes-basket-vegetables-circle-amber-background_140725-131600-removebg-preview.png"
+                                            alt="">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pc-third-ribbon-menu-item">
+                        <a href="/privacy-policy/"
+                            class="pc-third-ribbon-menu-link rhino-text text quicksand-text">Privacy Policy</a>
+                    </div>
+                    <div class="pc-third-ribbon-menu-item">
+                        <a href="/refund-and-return-policy/"
+                            class="pc-third-ribbon-menu-link rhino-text text quicksand-text">Refund and Return
+                            Policy</a>
+                    </div>
+                    <div class="pc-third-ribbon-menu-item">
+                        <a href="/contact-us/" class="pc-third-ribbon-menu-link rhino-text text quicksand-text">Contact
+                            Us</a>
+                    </div>
+                    <div class="pc-third-ribbon-menu-item">
+                        <a href="/suggest-product/"
+                            class="pc-third-ribbon-menu-link rhino-text text quicksand-text">Suggest a Product</a>
+                    </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const megaItems = document.querySelectorAll('.pc-has-mega');
+
+                            megaItems.forEach(item => {
+                                let hideTimeout;
+                                const trigger = item.querySelector('.pc-mega-trigger');
+                                const dropdown = item.querySelector('.pc-mega-dropdown');
+
+                                function openMega() {
+                                    megaItems.forEach(i => { if (i !== item) i.classList.remove('is-open'); });
+                                    clearTimeout(hideTimeout);
+                                    item.classList.add('is-open');
+                                }
+
+                                function closeMega() {
+                                    hideTimeout = setTimeout(() => {
+                                        item.classList.remove('is-open');
+                                    }, 500); // 0.5s grace to move cursor
+                                }
+
+                                // Hover logic
+                                trigger.addEventListener('mouseenter', openMega);
+                                trigger.addEventListener('mouseleave', closeMega);
+
+                                dropdown.addEventListener('mouseenter', () => {
+                                    clearTimeout(hideTimeout);
+                                    openMega();
+                                });
+
+                                dropdown.addEventListener('mouseleave', closeMega);
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-header-container">
+            <div class="m-first-ribbon">
+                <a href="/#hot-deals" class="pc-banner-link ocean-green-text text lato-text">
+                    <span class="pc-banner-text">
+                        Flash Deals Are Live — Steal the Best Offers Now!
+                    </span>
+                </a>
+            </div>
+            <div class="m-second-ribbon">
+                <div class="m-logo">
+                    <a href="/"><img src="https://ik.imagekit.io/intmarket/logo.png?updatedAt=1763862184023"
+                            alt="International Market Logo"></a>
+                </div>
+                <div class="m-header-right">
+                    <a href="{{ '/wishlist/' if current_customer else '/login' }}" class="m-icon-link">
+                        <div class="pc-second-ribbon-button-image-container">
+                            <div class="pc-second-ribbon-button-image">
+                                <img src="https://ik.imagekit.io/intmarket/wishlist.png?updatedAt=1763862183984"
+                                    alt="Wishlist">
+                            </div>
+                            <div class="pc-second-ribbon-button-number">
+                                <p id="wishlist-qty-mobile" class="ocean-green-text text quicksand-text">{{ wishlist_qty
+                                    }}</p>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="{{ '/cart/' if current_customer else '/login' }}" class="m-icon-link">
+                        <div class="pc-second-ribbon-button-image-container">
+                            <div class="pc-second-ribbon-button-image">
+                                <img src="https://ik.imagekit.io/intmarket/cart.png?updatedAt=1763862183972" alt="Cart">
+                            </div>
+                            <div class="pc-second-ribbon-button-number">
+                                <p id="cart-qty-mobile" class="ocean-green-text text quicksand-text">{{ cart_qty }}</p>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="{{ '/my-account/' if current_customer else '/login' }}" class="m-icon-link">
+                        <div class="pc-second-ribbon-button-image-container">
+                            <div class="pc-second-ribbon-button-image">
+                                <img src="https://ik.imagekit.io/intmarket/user.png?updatedAt=1763862183956"
+                                    alt="Account">
+                            </div>
+                        </div>
+                    </a>
+                    <button type="button" class="m-menu-toggle" aria-label="Open menu">
+                        <span class="m-bar"></span>
+                        <span class="m-bar"></span>
+                        <span class="m-bar"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="m-third-ribbon">
+                <div class="m-search-wrapper" data-global-search="1">
+                    <div class="pc-search-bar">
+                        <input id="globalKeywordMobile" class="gray-text text lato-text" type="text"
+                            placeholder="Search for products...">
+                        <a id="globalSearchBtnMobile" href="/search-results/"
+                            class="gray-text text lato-text">Search</a>
+                    </div>
+                </div>
+            </div>
+            <div id="m-menu-overlay" class="m-menu-overlay">
+                <div class="m-menu-panel">
+                    <button type="button" class="m-menu-close" aria-label="Close menu">&times;</button>
+                    <div class="m-menu-content">
+                        <div class="m-menu-control-container">
+                            <button class="gray-text text lato-text m-tab-btn-x92 m-tab-active"
+                                data-x92-target="panel-menu-x92">Menu</button>
+                            <button class="gray-text text lato-text m-tab-btn-x92"
+                                data-x92-target="panel-category-x92">Category</button>
+                        </div>
+                        <div class="m-tab-panels-x92">
+                            <div id="panel-menu-x92" class="m-tab-panel-x92 m-panel-active">
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/" class="m-third-ribbon-menu-link rhino-text text quicksand-text">Home</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/about-us/"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">About
+                                        Us</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item m-has-dropdown">
+                                    <button type="button" class="m-dropdown-toggle rhino-text text quicksand-text">
+                                        <span>Shop</span>
+                                        <span class="m-dropdown-arrow">&#9662;</span>
+                                    </button>
+                                    <div class="m-dropdown-panel">
+                                        <div class="m-dropdown-content-container">
+                                            <h1 class="ocean-green-text quicksand-text sub-title">Shop by Categories
+                                            </h1>
+
+                                            {% for cat in mega_parent_categories %}
+                                            <a href="/subcategories/?category_name={{ cat.slug }}"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">
+                                                {{ cat.name }}
+                                            </a>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="m-dropdown-content-container">
+                                            <h1 class="ocean-green-text quicksand-text sub-title">
+                                                Featured Categories
+                                            </h1>
+
+                                            {% for sub in mega_featured_subcategories %}
+                                            <a href="/search-results/?category={{ sub.parent_slug }}&subcategory={{ sub.slug }}&min_price=0&max_price=1000&hot_deal=true&popular=true&sort=default"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">
+                                                {{ sub.name }}
+                                            </a>
+                                            {% endfor %}
+
+                                            <a href="/#featured-categories"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">
+                                                View All Featured Categories
+                                            </a>
+                                        </div>
+                                        <div class="m-dropdown-content-container">
+                                            <h1 class="ocean-green-text quicksand-text sub-title">Store Tools</h1>
+                                            <a href="{{ '/wishlist/' if current_customer else '/login' }}"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">Wishlist</a>
+                                            <a href="{{ '/cart/' if current_customer else '/login' }}"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">Cart</a>
+                                            <a href="/#popular-products"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">Popular
+                                                Products</a>
+                                            <a href="/#hot-deals"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">Hot
+                                                Deals</a>
+                                            <a href="/#new-arrivals"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">New
+                                                Arrivals</a>
+                                            <a href="/cart#recently-viewed"
+                                                class="pc-third-ribbon-menu-link gray-text lato-text text">Recently
+                                                Viewed</a>
+                                        </div>
+                                        <div class="m-dropdown-last-container">
+                                            <h1 class="ocean-green-text quicksand-text text">Fresh Arrivals</h1>
+                                            <h1 class="rhino-text sub-title quicksand-text">Today’s Freshly Stocked
+                                                Produce</h1>
+                                            <div class="m-dropdown-last-container-image-container">
+                                                <div class="m-dropdown-last-container-image-container-button">
+                                                    <a href="/#hot-deals" class="white-text text quicksand-text">Shop
+                                                        Fresh</a>
+                                                </div>
+                                                <div class="m-dropdown-last-container-image-container-image">
+                                                    <img src="https://ik.imagekit.io/intmarket/top-half-view-circle-shape-hot-peppers-cherry-tomatoes-basket-vegetables-circle-amber-background_140725-131600-removebg-preview.png"
+                                                        alt="">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            const shopItem = document.querySelector(
+                                                '#panel-menu-x92 .m-third-ribbon-menu-item.m-has-dropdown'
+                                            );
+                                            if (!shopItem) return;
+
+                                            const toggle = shopItem.querySelector('.m-dropdown-toggle');
+
+                                            toggle.addEventListener('click', function (e) {
+                                                e.stopPropagation();
+                                                shopItem.classList.toggle('is-open');
+                                            });
+                                        });
+                                    </script>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="{{ '/my-account/' if current_customer else '/login' }}"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">My Account</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="{{ '/wishlist/' if current_customer else '/login' }}"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">Wishlist</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/privacy-policy/"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">Privacy
+                                        Policy</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/refund-and-return-policy/"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">Refund and
+                                        Return
+                                        Policy</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/contact-us/"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">Contact
+                                        Us</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/suggest-product/"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">Suggest a
+                                        Product</a>
+                                </div>
+                                <div class="m-third-ribbon-menu-item">
+                                    <a href="/help-center/"
+                                        class="m-third-ribbon-menu-link rhino-text text quicksand-text">Help Center</a>
+                                </div>
+                            </div>
+                            <div id="panel-category-x92" class="m-tab-panel-x92">
+                                <div class="extra-space-above-container"></div>
+                                {% for category in parent_categories %}
+                                <div class="m-menu-category-button-container">
+                                    <a href="/subcategories/?category_name={{ category.slug }}"
+                                        class="m-menu-category-button">
+                                        {% if category.image_url %}
+                                        <div class="category-button-image-container">
+                                            <img src="{{ category.image_url }}" alt="{{ category.name }}">
+                                        </div>
+                                        {% endif %}
+                                        <p class="rhino-text text quicksand-text">
+                                            {{ category.name }}
+                                        </p>
+                                        <div class="category-button-quantity-container">
+                                            <p class="white-text text quicksand-text">
+                                                {{ category.subcategory_count }}
+                                            </p>
+                                        </div>
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="m-after-menu-content-menu">
+                            <div class="m-menu-hot-deals-button">
+                                <a href="/#hot-deals" class="m-second-ribbon-button-container">
+                                    <div class="pc-second-ribbon-button-container-div">
+                                        <div class="pc-second-ribbon-button-image-container">
+                                            <div class="pc-second-ribbon-button-image">
+                                                <img src="https://ik.imagekit.io/intmarket/flame.png?updatedAt=1763862183933"
+                                                    alt="">
+                                            </div>
+                                        </div>
+                                        <div class="pc-second-ribbon-button-name-container">
+                                            <p class="rhino-text text quicksand-text">Hot Deals</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="m-menu-need-help-content-container">
+                                <p class="gray-text text lato-text">
+                                    Need help? Call Us:
+                                    <a href="tel:{{app_settings.number_to_give}}"
+                                        class="ocean-green-text">{{app_settings.number_to_show}}</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                            const btns = document.querySelectorAll(".m-tab-btn-x92");
+                            const panels = document.querySelectorAll(".m-tab-panel-x92");
+
+                            btns.forEach(btn => {
+                                btn.addEventListener("click", () => {
+                                    const target = btn.dataset.x92Target;
+
+                                    // Remove active from buttons
+                                    btns.forEach(b => b.classList.remove("m-tab-active"));
+
+                                    // Add active to clicked button
+                                    btn.classList.add("m-tab-active");
+
+                                    // Hide all panels
+                                    panels.forEach(p => p.classList.remove("m-panel-active"));
+
+                                    // Show the clicked panel
+                                    document.getElementById(target).classList.add("m-panel-active");
+                                });
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const toggleBtn = document.querySelector('.m-menu-toggle');
+                    const overlay = document.getElementById('m-menu-overlay');
+                    const closeBtn = overlay ? overlay.querySelector('.m-menu-close') : null;
+                    const panel = overlay ? overlay.querySelector('.m-menu-panel') : null;
+
+                    if (!toggleBtn || !overlay || !closeBtn || !panel) return;
+
+                    function openMenu() {
+                        overlay.classList.add('is-open');
+                        document.body.classList.add('mobile-menu-open');
+                    }
+
+                    function closeMenu() {
+                        overlay.classList.remove('is-open');
+                        document.body.classList.remove('mobile-menu-open');
+                    }
+
+                    toggleBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        openMenu();
+                    });
+
+                    closeBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        closeMenu();
+                    });
+
+                    /* click outside panel closes menu */
+                    overlay.addEventListener('click', function (e) {
+                        if (!panel.contains(e.target)) {
+                            closeMenu();
+                        }
+                    });
+                });
+            </script>
+        </div>
+        <script>
+            (function () {
+                // If we're on /search-results/, do nothing.
+                // (You said search page won't include this container anyway, but this is extra safe.)
+                if (window.location.pathname === "/search-results/") return;
+
+                const pcInput = document.getElementById("globalKeywordPc");
+                const mInput = document.getElementById("globalKeywordMobile");
+                const pcBtn = document.getElementById("globalSearchBtnPc");
+                const mBtn = document.getElementById("globalSearchBtnMobile");
+
+                function isVisible(el) {
+                    return !!(el && el.offsetParent !== null);
+                }
+
+                function getKeyword() {
+                    // Prefer visible input
+                    if (isVisible(pcInput)) return (pcInput.value || "").trim();
+                    if (isVisible(mInput)) return (mInput.value || "").trim();
+
+                    // Fallback
+                    const pcVal = pcInput ? (pcInput.value || "").trim() : "";
+                    const mVal = mInput ? (mInput.value || "").trim() : "";
+                    return pcVal || mVal;
+                }
+
+                function setKeyword(val) {
+                    if (pcInput) pcInput.value = val;
+                    if (mInput) mInput.value = val;
+                }
+
+                // Keep PC + Mobile keyword synced
+                if (pcInput) pcInput.addEventListener("input", () => setKeyword(pcInput.value));
+                if (mInput) mInput.addEventListener("input", () => setKeyword(mInput.value));
+
+                function buildDefaultSearchParams(keyword) {
+                    const p = new URLSearchParams();
+
+                    // ✅ IMPORTANT: do NOT search if keyword is empty
+                    // (Prevents showing all products)
+                    if (keyword) {
+                        p.set("keyword", keyword);
+                    } else {
+                        return null;
+                    }
+
+                    // defaults
+                    p.set("category", "all");
+                    p.set("subcategory", "all");
+                    p.set("min_price", "0");
+                    p.set("max_price", "1000");
+                    p.set("hot_deal", "true");
+                    p.set("popular", "true");
+                    p.set("sort", "default");
+
+                    return p;
+                }
+
+                function goToSearchResultsWithDefaults(e) {
+                    if (e) e.preventDefault();
+
+                    const kw = getKeyword();
+                    const params = buildDefaultSearchParams(kw);
+
+                    // If keyword empty, just focus the visible input and stop.
+                    if (!params) {
+                        if (isVisible(pcInput)) pcInput.focus();
+                        else if (isVisible(mInput)) mInput.focus();
+                        return;
+                    }
+
+                    window.location.href = "/search-results/?" + params.toString();
+                }
+
+                // Button clicks
+                if (pcBtn) pcBtn.addEventListener("click", goToSearchResultsWithDefaults);
+                if (mBtn) mBtn.addEventListener("click", goToSearchResultsWithDefaults);
+
+                // Enter key triggers search
+                [pcInput, mInput].forEach(inp => {
+                    if (!inp) return;
+                    inp.addEventListener("keydown", (e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            goToSearchResultsWithDefaults(e);
+                        }
+                    });
+                });
+            })();
+        </script>
+    </header>
+    <section class="policy-section">
+
+        <div class="policy-header">
+            <h1 class="quicksand-text rhino-text page-title">Terms & Conditions</h1>
+            <p class="lato-text text gray-text">
+                These terms govern your use of our website and services.
+            </p>
+        </div>
+
+        <div class="policy-content">
+
+            <h2 class="quicksand-text rhino-text sub-title">Acceptance of Terms</h2>
+            <p class="lato-text text gray-text">
+                By accessing or using our website, you agree to comply with and be bound by these Terms
+                and Conditions.
+            </p>
+
+            <h2 class="quicksand-text rhino-text sub-title">Use of Services</h2>
+            <p class="lato-text text gray-text">
+                You agree to use our services for lawful purposes only and not to engage in any activity
+                that could harm the platform or its users.
+            </p>
+
+            <h2 class="quicksand-text rhino-text sub-title">Account Responsibility</h2>
+            <p class="lato-text text gray-text">
+                You are responsible for maintaining the confidentiality of your account information and
+                all activities that occur under your account.
+            </p>
+
+            <h2 class="quicksand-text rhino-text sub-title">Limitation of Liability</h2>
+            <p class="lato-text text gray-text">
+                International Market shall not be liable for any indirect, incidental, or consequential
+                damages resulting from the use of our services.
+            </p>
+
+            <h2 class="quicksand-text rhino-text sub-title">Changes to Terms</h2>
+            <p class="lato-text text gray-text">
+                We reserve the right to update these Terms and Conditions at any time without prior notice.
+            </p>
+
+        </div>
+
+    </section>
+    <footer class="footer-section">
+        <div class="footer-newsletter-section">
+            <div class="newsletter-subscribe-container">
+                <div class="newsletter-subscribe-content-container">
+                    <h1 class="quicksand-text rhino-text page-title">Join our list & never miss exclusive grocery deals
+                        again
+                    </h1>
+                    <p class="lato-text text gray-text">Sign up today and receive updates, discounts, and weekly offers
+                    </p>
+                    <div class="newsletter-subscribe-input-container">
+                        <input id="newsletterEmail" class="gray-text text lato-text" type="text"
+                            placeholder="Your email address">
+                        <a id="newsletterSubscribeBtn" href="#" class="gray-text text lato-text">Subscribe</a>
+                    </div>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                            const input = document.getElementById("newsletterEmail");
+                            const btn = document.getElementById("newsletterSubscribeBtn");
+
+                            if (!input || !btn) return;
+
+                            btn.addEventListener("click", async (e) => {
+                                e.preventDefault();
+
+                                const email = (input.value || "").trim();
+                                if (!email) return;
+
+                                try {
+                                    const res = await fetch("/api/newsletter/subscribe", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ email })
+                                    });
+
+                                    const data = await res.json();
+
+                                    if (data.ok) {
+                                        input.value = ""; // ✅ clear input
+                                        // optional: show success message
+                                        // alert(data.message);
+                                    } else {
+                                        // optional: show error message
+                                        // alert(data.message || "Failed");
+                                    }
+                                } catch (err) {
+                                    // optional: alert("Network error");
+                                    console.error(err);
+                                }
+                            });
+                        });
+                    </script>
+                </div>
+                <div class="newsletter-subscribe-image-container">
+                    <img src="https://themepanthers.com/wp/nest/d1/wp-content/uploads/2022/02/banner-9-min.png" alt="">
+                </div>
+            </div>
+        </div>
+        <div class="footer-features-section">
+            <div class="footer-feature-container">
+                <div class="footer-feature-image-container">
+                    <img src="https://ik.imagekit.io/intmarket/icon-1.png" alt="">
+                </div>
+                <div class="footer-feature-content-container">
+                    <h1 class="sub-sub-title quicksand-text rhino-text">Best prices & offers</h1>
+                    <p class="text lato-text gray-text">Fresh savings on daily essentials</p>
+                </div>
+            </div>
+            <div class="footer-feature-container">
+                <div class="footer-feature-image-container">
+                    <img src="https://ik.imagekit.io/intmarket/icon-2.png" alt="">
+                </div>
+                <div class="footer-feature-content-container">
+                    <h1 class="sub-sub-title quicksand-text rhino-text">Freshness Guaranteed</h1>
+                    <p class="text lato-text gray-text">Quality checked before delivery</p>
+                </div>
+            </div>
+            <div class="footer-feature-container">
+                <div class="footer-feature-image-container">
+                    <img src="https://ik.imagekit.io/intmarket/icon-3.png" alt="">
+                </div>
+                <div class="footer-feature-content-container">
+                    <h1 class="sub-sub-title quicksand-text rhino-text">Great daily deal</h1>
+                    <p class="text lato-text gray-text">Exclusive offers when you sign up</p>
+                </div>
+            </div>
+            <div class="footer-feature-container">
+                <div class="footer-feature-image-container">
+                    <img src="https://ik.imagekit.io/intmarket/icon-4.png" alt="">
+                </div>
+                <div class="footer-feature-content-container">
+                    <h1 class="sub-sub-title quicksand-text rhino-text">Wide assortment</h1>
+                    <p class="text lato-text gray-text">Everything you need in one place</p>
+                </div>
+            </div>
+            <div class="footer-feature-container">
+                <div class="footer-feature-image-container">
+                    <img src="https://ik.imagekit.io/intmarket/icon-5.png" alt="">
+                </div>
+                <div class="footer-feature-content-container">
+                    <h1 class="sub-sub-title quicksand-text rhino-text">Customer Support</h1>
+                    <p class="text lato-text gray-text">Fast help whenever you need it</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-menu-section">
+            <div class="footer-menu-main-content-container">
+                <div class="footer-logo-container">
+                    <img src="https://ik.imagekit.io/intmarket/logo.png?updatedAt=1763862184023" alt="">
+                </div>
+                <div class="footer-description-container">
+                    <p class="lato-text text rhino-text">Fresh, high-quality groceries delivered with care—bringing
+                        everyday essentials, great value, and trusted service straight to your neighborhood, every
+                        single day.</p>
+                </div>
+                <div class="footer-info-container">
+                    <div class="footer-info-item-container">
+                        <div class="footer-info-item-image-container">
+                            <img src="https://ik.imagekit.io/intmarket/icons8-location-100%20(3).png" alt="">
+                        </div>
+                        <div class="footer-info-item-content-container">
+                            <p class="lato-text text rhino-text">{{app_settings.address}}</p>
+                        </div>
+                    </div>
+                    <div class="footer-info-item-container">
+                        <div class="footer-info-item-image-container">
+                            <img src="https://ik.imagekit.io/intmarket/icons8-headphones-100%20(1).png" alt="">
+                        </div>
+                        <div class="footer-info-item-content-container">
+                            <p class="rhino-text text lato-text">
+                                Need help? Call Us:
+                                <a href="tel:{{app_settings.number_to_give}}"
+                                    class="ocean-green-text">{{app_settings.number_to_show}}</a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="footer-info-item-container">
+                        <div class="footer-info-item-image-container">
+                            <img src="https://ik.imagekit.io/intmarket/icons8-email-100.png?updatedAt=1766535705131"
+                                alt="">
+                        </div>
+                        <div class="footer-info-item-content-container">
+                            <p class="lato-text text rhino-text">{{app_settings.email}}</p>
+                        </div>
+                    </div>
+                    <div class="footer-info-item-container">
+                        <div class="footer-info-item-image-container">
+                            <img src="https://ik.imagekit.io/intmarket/icons8-delivery-time-100.png?updatedAt=1766535705033"
+                                alt="">
+                        </div>
+                        <div class="footer-info-item-content-container">
+                            <p class="lato-text text rhino-text">{{app_settings.hours}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-menu-items-container">
+                <div class="footer-menu-category-container">
+                    <h1 class="sub-title quicksand-text rhino-text">Account</h1>
+                    <div class="footer-menu-items-content-container">
+                        <a href="{{ '/my-account/' if current_customer else '/login' }}"
+                            class="pc-third-ribbon-menu-link rhino-text text lato-text">My Account</a>
+                        <a href="{{ '/cart/' if current_customer else '/login' }}"
+                            class="pc-third-ribbon-menu-link rhino-text text lato-text">View Cart</a>
+                        <a href="{{ '/wishlist/' if current_customer else '/login' }}"
+                            class="pc-third-ribbon-menu-link rhino-text text lato-text">My Wishlist</a>
+                        <a href="/#popular-products" class="pc-third-ribbon-menu-link rhino-text text lato-text">Popular
+                            Products</a>
+                        <a href="/cart#recently-viewed"
+                            class="pc-third-ribbon-menu-link rhino-text text lato-text">Recently Viewed</a>
+                        <a href="/#hot-deals" class="pc-third-ribbon-menu-link rhino-text text lato-text">Deals</a>
+                        <a href="/#hot-deals" class="pc-third-ribbon-menu-link rhino-text text lato-text">Hot deals</a>
+                    </div>
+                </div>
+                <div class="footer-menu-category-container">
+                    <h1 class="sub-title quicksand-text rhino-text">Company</h1>
+                    <div class="footer-menu-items-content-container">
+                        <a href="/about-us/" class="pc-third-ribbon-menu-link rhino-text text lato-text">About Us</a>
+                        <a href="/refund-and-return-policy/"
+                            class="pc-third-ribbon-menu-link rhino-text text lato-text">Refund and Return Policy</a>
+                        <a href="/privacy-policy/" class="pc-third-ribbon-menu-link rhino-text text lato-text">Privacy
+                            Policy</a>
+                        <a href="/terms-and-conditions/"
+                            class="pc-third-ribbon-menu-link rhino-text text lato-text">Terms and Conditions</a>
+                        <a href="/contact-us/" class="pc-third-ribbon-menu-link rhino-text text lato-text">Contact
+                            Us</a>
+                        <a href="/suggest-product/" class="pc-third-ribbon-menu-link rhino-text text lato-text">Suggest
+                            a Product</a>
+                        <a href="/help-center/" class="pc-third-ribbon-menu-link rhino-text text lato-text">Help
+                            center</a>
+                    </div>
+                </div>
+                <div class="footer-menu-category-container">
+                    <h1 class="sub-title quicksand-text rhino-text">Shop by Categories</h1>
+                    <div class="footer-menu-items-content-container">
+                        {% for cat in mega_parent_categories %}
+                        <a href="/subcategories/?category_name={{ cat.slug }}"
+                            class="pc-third-ribbon-menu-link rhino-text lato-text text">
+                            {{ cat.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="footer-menu-category-container">
+                    <h1 class="sub-title quicksand-text rhino-text">Featured Categories</h1>
+                    <div class="footer-menu-items-content-container">
+                        {% for sub in mega_featured_subcategories %}
+                        <a href="/search-results/?category_name={{ sub.slug }}"
+                            class="pc-third-ribbon-menu-link rhino-text lato-text text">
+                            {{ sub.name }}
+                        </a>
+                        {% endfor %}
+
+                        <a href="/#featured-categories" class="pc-third-ribbon-menu-link rhino-text lato-text text">
+                            View All Featured Categories
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-ending-section">
+            <p class="lato-text text gray-text">&copy; International Market - All Rights Reserved</p>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const h = window.__LANG_HELPERS__;
+            if (!h) return;
+
+            const wrapper = document.querySelector(".gtranslate_wrapper");
+            if (!wrapper) return;
+
+            function bind() {
+                const select = document.querySelector(".gt_switcher_wrapper select.gt_selector")
+                    || wrapper.querySelector("select.gt_selector");
+                if (!select) return false;
+
+                select.addEventListener("change", (e) => {
+                    const val = e.target.value;
+                    if (!val) return;
+
+                    const target = val.split("|")[1]; // "es" or "en"
+
+                    h.setCookie(h.SITE_COOKIE, target, h.DAYS);
+
+                    const source = "en";
+                    document.cookie = `googtrans=/${source}/${target}; path=/; SameSite=Lax`;
+                    document.cookie = `googtrans=/${source}/${target}; domain=${location.hostname}; path=/; SameSite=Lax`;
+                });
+
+                return true;
+            }
+
+            if (bind()) return;
+
+            const obs = new MutationObserver(() => {
+                if (bind()) obs.disconnect();
+            });
+
+            obs.observe(document.documentElement, { childList: true, subtree: true });
+        });
+    </script>
+    <div class="gtranslate_wrapper"></div>
+</body>
+
+</html>

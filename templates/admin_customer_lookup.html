@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{page_title}}</title>
+    <link rel="stylesheet" href="/css/admin-main.css">
+    <link rel="stylesheet" href="/css/admin-login.css">
+    <link rel="stylesheet" href="/css/admin-customers.css">
+</head>
+
+<body>
+    <header class="admin-section admin-header">
+        <div class="admin-header-home-button">
+            <a href="/core/ops/admin/dashboard" class="quicksand-text white-text text">Home</a>
+        </div>
+        <div class="admin-header-home-button">
+            <a target="_blank" href="/" class="quicksand-text white-text text">Go to Store</a>
+        </div>
+        <div class="admin-header-logout-button">
+            <a href="/core/ops/admin/logout" class="quicksand-text white-text text">Signout</a>
+        </div>
+    </header>
+    <section class="admin-section admin-page-title">
+        <h1 class="rhino-text quicksand-text title">Admin Panel</h1>
+    </section>
+    <script>
+        (async function adminGuard() {
+            try {
+                // Call auth check endpoint (cookie is sent automatically by browser)
+                const res = await fetch("/core/ops/admin/api/auth/check", {
+                    method: "GET",
+                    credentials: "same-origin",
+                    cache: "no-store",
+                });
+
+                if (!res.ok) {
+                    // Not logged in → send to admin login
+                    window.location.replace("/core/ops/admin/login");
+                    return;
+                }
+            } catch (err) {
+                // If server unreachable or anything weird → safer to go login
+                window.location.replace("/core/ops/admin/login");
+            }
+        })();
+    </script>
+    <section class="admin-section">
+        <div class="cust-lookup-wrap">
+
+            <div class="cust-top">
+                <div class="cust-title-block">
+                    <h2 class="rhino-text quicksand-text sub-title">{{ heading }}</h2>
+                    <p class="lato-text text gray-text">
+                        Search customers using any combination of fields. At least one field is required.
+                    </p>
+                </div>
+
+                <div class="cust-actions">
+                    <a href="/core/ops/admin/dashboard" class="cust-back-btn quicksand-text text">
+                        ← Back
+                    </a>
+                </div>
+            </div>
+
+            {% if error %}
+            <div class="cust-error lato-text text">{{ error }}</div>
+            {% endif %}
+
+            <form id="customerLookupForm" method="get" action="/core/ops/admin/dashboard/customer-search-results"
+                class="cust-form">
+
+                <div class="cust-grid-2">
+
+                    <div class="cust-row">
+                        <label class="lato-text text gray-text">Customer ID</label>
+                        <input class="cust-input lato-text text gray-text" type="text" name="customer_id"
+                            placeholder="e.g. 12" value="{{ filters.customer_id }}">
+                    </div>
+
+                    <div class="cust-row">
+                        <label class="lato-text text gray-text">Email</label>
+                        <input class="cust-input lato-text text gray-text" type="text" name="email"
+                            placeholder="e.g. user@example.com" value="{{ filters.email }}">
+                    </div>
+
+                </div>
+
+                <div class="cust-grid-2">
+
+                    <div class="cust-row">
+                        <label class="lato-text text gray-text">First Name</label>
+                        <input class="cust-input lato-text text gray-text" type="text" name="first_name"
+                            placeholder="e.g. Rowan" value="{{ filters.first_name }}">
+                    </div>
+
+                    <div class="cust-row">
+                        <label class="lato-text text gray-text">Last Name</label>
+                        <input class="cust-input lato-text text gray-text" type="text" name="last_name"
+                            placeholder="e.g. Dempsey" value="{{ filters.last_name }}">
+                    </div>
+
+                </div>
+
+                <div class="cust-row">
+                    <label class="lato-text text gray-text">Phone</label>
+                    <input class="cust-input lato-text text gray-text" type="text" name="phone"
+                        placeholder="e.g. +1 123 456 7890" value="{{ filters.phone }}">
+                </div>
+
+                <div class="cust-form-actions">
+                    <button type="submit" class="cust-search-btn quicksand-text text">
+                        Search
+                    </button>
+                </div>
+
+            </form>
+
+            <div class="cust-hint-card">
+                <p class="lato-text text gray-text">
+                    Tip: You can enter partial values. Example: first name “row” will match “Rowan”.
+                </p>
+            </div>
+
+        </div>
+    </section>
+    <script>
+        (function () {
+            const form = document.getElementById("customerLookupForm");
+            if (!form) return;
+
+            const fields = ["customer_id", "email", "first_name", "last_name", "phone"]
+                .map(n => form.querySelector(`[name="${n}"]`))
+                .filter(Boolean);
+
+            function hasAnyValue() {
+                return fields.some(el => (el.value || "").trim().length > 0);
+            }
+
+            form.addEventListener("submit", (e) => {
+                // Trim all fields
+                fields.forEach(el => { el.value = (el.value || "").trim(); });
+
+                if (!hasAnyValue()) {
+                    e.preventDefault();
+                    alert("Please enter at least one field to search.");
+                    fields[0]?.focus();
+                    return;
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

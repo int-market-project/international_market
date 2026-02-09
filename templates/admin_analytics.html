@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{page_title}}</title>
+    <link rel="stylesheet" href="/css/admin-main.css">
+    <link rel="stylesheet" href="/css/admin-login.css">
+    <link rel="stylesheet" href="/css/admin-analytics.css">
+</head>
+
+<body>
+    <header class="admin-section admin-header">
+        <div class="admin-header-home-button">
+            <a href="/core/ops/admin/dashboard" class="quicksand-text white-text text">Home</a>
+        </div>
+        <div class="admin-header-home-button">
+            <a target="_blank" href="/" class="quicksand-text white-text text">Go to Store</a>
+        </div>
+        <div class="admin-header-logout-button">
+            <a href="/core/ops/admin/logout" class="quicksand-text white-text text">Signout</a>
+        </div>
+    </header>
+    <section class="admin-section admin-page-title">
+        <h1 class="rhino-text quicksand-text title">Admin Panel</h1>
+    </section>
+    <script>
+        (async function adminGuard() {
+            try {
+                // Call auth check endpoint (cookie is sent automatically by browser)
+                const res = await fetch("/core/ops/admin/api/auth/check", {
+                    method: "GET",
+                    credentials: "same-origin",
+                    cache: "no-store",
+                });
+
+                if (!res.ok) {
+                    // Not logged in → send to admin login
+                    window.location.replace("/core/ops/admin/login");
+                    return;
+                }
+            } catch (err) {
+                // If server unreachable or anything weird → safer to go login
+                window.location.replace("/core/ops/admin/login");
+            }
+        })();
+    </script>
+    <section class="admin-section">
+        <div class="ana-page-wrap">
+
+            <div class="ana-page-top">
+                <div>
+                    <h2 class="rhino-text quicksand-text sub-title">{{ heading }}</h2>
+                    <p class="lato-text text gray-text">
+                        Live analytics snapshot generated at
+                        <span style="font-weight:700;">
+                            {{ snapshot.generated_at }}
+                        </span>
+                    </p>
+                </div>
+
+                <div class="ana-actions">
+                    <a href="/core/ops/admin/dashboard" class="ana-action-btn quicksand-text text">← Back</a>
+                </div>
+            </div>
+
+            <!-- ============================= -->
+            <!-- SUMMARY CARDS -->
+            <!-- ============================= -->
+
+            <div class="ana-cards-grid">
+                <div class="ana-card">
+                    <p class="lato-text text gray-text">Total Orders</p>
+                    <h2 class="quicksand-text rhino-text">{{ snapshot.orders.total_orders }}</h2>
+                </div>
+
+                <div class="ana-card">
+                    <p class="lato-text text gray-text">Total Revenue (Delivered)</p>
+                    <h2 class="quicksand-text rhino-text">$ {{ "%.2f"|format(snapshot.revenue.total_revenue) }}</h2>
+                </div>
+
+                <div class="ana-card">
+                    <p class="lato-text text gray-text">Average Order Value (Delivered)</p>
+                    <h2 class="quicksand-text rhino-text">$ {{ "%.2f"|format(snapshot.revenue.avg_order_value) }}</h2>
+                </div>
+
+                <div class="ana-card">
+                    <p class="lato-text text gray-text">Orders Today</p>
+                    <h2 class="quicksand-text rhino-text">{{ snapshot.orders.orders_today }}</h2>
+                </div>
+
+                <div class="ana-card">
+                    <p class="lato-text text gray-text">Orders This Week</p>
+                    <h2 class="quicksand-text rhino-text">{{ snapshot.orders.orders_this_week }}</h2>
+                </div>
+
+                <div class="ana-card">
+                    <p class="lato-text text gray-text">Orders This Month</p>
+                    <h2 class="quicksand-text rhino-text">{{ snapshot.orders.orders_this_month }}</h2>
+                </div>
+
+                <div class="ana-card">
+                    <p class="lato-text text gray-text">Revenue Today (Delivered)</p>
+                    <h2 class="quicksand-text rhino-text">$ {{ "%.2f"|format(snapshot.revenue.revenue_today) }}</h2>
+                </div>
+
+                <div class="ana-card">
+                    <p class="lato-text text gray-text">Revenue This Week (Delivered)</p>
+                    <h2 class="quicksand-text rhino-text">$ {{ "%.2f"|format(snapshot.revenue.revenue_this_week) }}</h2>
+                </div>
+
+                <div class="ana-card">
+                    <p class="lato-text text gray-text">Revenue This Month (Delivered)</p>
+                    <h2 class="quicksand-text rhino-text">$ {{ "%.2f"|format(snapshot.revenue.revenue_this_month) }}
+                    </h2>
+                </div>
+            </div>
+
+            <!-- ============================= -->
+            <!-- ORDERS / REVENUE CHARTS -->
+            <!-- ============================= -->
+
+            <div class="ana-chart-grid">
+                <div class="ana-chart-card">
+                    <h3 class="rhino-text quicksand-text sub-sub-title">Orders (Today / Week / Month)</h3>
+                    <div class="ana-canvas-wrap">
+                        <canvas id="chart-orders"></canvas>
+                    </div>
+                </div>
+
+                <div class="ana-chart-card">
+                    <h3 class="rhino-text quicksand-text sub-sub-title">Revenue (Delivered) (Today / Week / Month)</h3>
+                    <div class="ana-canvas-wrap">
+                        <canvas id="chart-revenue"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================= -->
+            <!-- CUSTOMERS -->
+            <!-- ============================= -->
+
+            <h2 class="rhino-text quicksand-text sub-title ana-section-title">Customers</h2>
+
+            <div class="ana-cards-grid ana-cards-grid-4">
+                <div class="ana-card">
+                    <p class="lato-text text gray-text">Total Customers</p>
+                    <h2 class="quicksand-text rhino-text">{{ snapshot.customers.total_customers }}</h2>
+                </div>
+
+                <div class="ana-card">
+                    <p class="lato-text text gray-text">Customers With ≥ 1 Order</p>
+                    <h2 class="quicksand-text rhino-text">{{ snapshot.customers.customers_with_orders }}</h2>
+                </div>
+
+                <div class="ana-card">
+                    <p class="lato-text text gray-text">New Customers (This Week)</p>
+                    <h2 class="quicksand-text rhino-text">{{ snapshot.customers.new_customers_this_week }}</h2>
+                </div>
+
+                <div class="ana-card">
+                    <p class="lato-text text gray-text">New Customers (This Month)</p>
+                    <h2 class="quicksand-text rhino-text">{{ snapshot.customers.new_customers_this_month }}</h2>
+                </div>
+            </div>
+
+            <!-- ============================= -->
+            <!-- PAYMENTS -->
+            <!-- ============================= -->
+
+            <h2 class="rhino-text quicksand-text sub-title ana-section-title">Payments</h2>
+
+            <div class="ana-chart-grid">
+                <div class="ana-chart-card">
+                    <h3 class="rhino-text quicksand-text sub-sub-title">COD vs Online (Transactions)</h3>
+                    <div class="ana-canvas-wrap">
+                        <canvas id="chart-payments"></canvas>
+                    </div>
+
+                    <div class="ana-mini-kv lato-text text gray-text">
+                        <span><strong>COD:</strong> {{ snapshot.payments.cod_count }} ({{
+                            "%.1f"|format(snapshot.payments.cod_pct) }}%)</span>
+                        <span><strong>Online:</strong> {{ snapshot.payments.online_count }} ({{
+                            "%.1f"|format(snapshot.payments.online_pct) }}%)</span>
+                    </div>
+                </div>
+
+                <div class="ana-chart-card">
+                    <h3 class="rhino-text quicksand-text sub-sub-title">Operational</h3>
+                    <div class="ana-mini-grid">
+                        <div class="ana-mini-card">
+                            <p class="lato-text text gray-text">Canceled Orders</p>
+                            <h3 class="quicksand-text rhino-text">{{ snapshot.orders.canceled_orders }}</h3>
+                        </div>
+
+                        <div class="ana-mini-card">
+                            <p class="lato-text text gray-text">Total Transactions</p>
+                            <h3 class="quicksand-text rhino-text">{{ snapshot.payments.total_transactions }}</h3>
+                        </div>
+
+                        <div class="ana-mini-card">
+                            <p class="lato-text text gray-text">Delivered Orders</p>
+                            <h3 class="quicksand-text rhino-text">{{ snapshot.revenue.delivered_orders_count }}</h3>
+                        </div>
+
+                        <div class="ana-mini-card">
+                            <p class="lato-text text gray-text">Total Products</p>
+                            <h3 class="quicksand-text rhino-text">{{ snapshot.products.total_products }}</h3>
+                        </div>
+
+                        <div class="ana-mini-card">
+                            <p class="lato-text text gray-text">Unique Products Sold</p>
+                            <h3 class="quicksand-text rhino-text">{{ snapshot.products.unique_products_sold }}</h3>
+                        </div>
+
+                        <div class="ana-mini-card">
+                            <p class="lato-text text gray-text">Products Never Sold</p>
+                            <h3 class="quicksand-text rhino-text">{{ snapshot.products.never_sold_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================= -->
+            <!-- PRODUCTS -->
+            <!-- ============================= -->
+
+            <h2 class="rhino-text quicksand-text sub-title ana-section-title">Products</h2>
+
+            <div class="ana-chart-grid">
+                <div class="ana-chart-card">
+                    <h3 class="rhino-text quicksand-text sub-sub-title">Top 10 Sold Products (Qty)</h3>
+                    <div class="ana-canvas-wrap">
+                        <canvas id="chart-top-sold"></canvas>
+                    </div>
+
+                    <div class="ana-table-wrap">
+                        <table class="ana-table">
+                            <thead>
+                                <tr>
+                                    <th class="lato-text text gray-text">Product</th>
+                                    <th class="lato-text text gray-text">Qty Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in snapshot.products.top_sold_by_qty %}
+                                <tr>
+                                    <td class="lato-text text">{{ p.name if p.name else ("Product " ~ p.product_id) }}
+                                        (ID: {{ p.product_id }})</td>
+                                    <td class="lato-text text">{{ p.qty }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="ana-chart-card">
+                    <h3 class="rhino-text quicksand-text sub-sub-title">Top 10 Ordered Products (Order Count)</h3>
+                    <div class="ana-canvas-wrap">
+                        <canvas id="chart-top-ordered"></canvas>
+                    </div>
+
+                    <div class="ana-table-wrap">
+                        <table class="ana-table">
+                            <thead>
+                                <tr>
+                                    <th class="lato-text text gray-text">Product</th>
+                                    <th class="lato-text text gray-text">Orders</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in snapshot.products.top_ordered_by_order_count %}
+                                <tr>
+                                    <td class="lato-text text">{{ p.name if p.name else ("Product " ~ p.product_id) }}
+                                        (ID: {{ p.product_id }})</td>
+                                    <td class="lato-text text">{{ p.order_count }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ana-chart-grid">
+                <div class="ana-chart-card">
+                    <h3 class="rhino-text quicksand-text sub-sub-title">Most Viewed Products</h3>
+                    <div class="ana-canvas-wrap">
+                        <canvas id="chart-top-viewed"></canvas>
+                    </div>
+
+                    <div class="ana-table-wrap">
+                        <table class="ana-table">
+                            <thead>
+                                <tr>
+                                    <th class="lato-text text gray-text">Product</th>
+                                    <th class="lato-text text gray-text">Views</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in snapshot.products.top_viewed %}
+                                <tr>
+                                    <td class="lato-text text">{{ p.name if p.name else ("Product " ~ p.product_id) }}
+                                        (ID: {{ p.product_id }})</td>
+                                    <td class="lato-text text">{{ p.views }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="ana-chart-card">
+                    <h3 class="rhino-text quicksand-text sub-sub-title">Top Rated Products (Avg Rating)</h3>
+                    <div class="ana-canvas-wrap">
+                        <canvas id="chart-top-rated"></canvas>
+                    </div>
+
+                    <div class="ana-table-wrap">
+                        <table class="ana-table">
+                            <thead>
+                                <tr>
+                                    <th class="lato-text text gray-text">Product</th>
+                                    <th class="lato-text text gray-text">Avg Rating</th>
+                                    <th class="lato-text text gray-text">Reviews</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in snapshot.products.top_rated %}
+                                <tr>
+                                    <td class="lato-text text">{{ p.name if p.name else ("Product " ~ p.product_id) }}
+                                        (ID: {{ p.product_id }})</td>
+                                    <td class="lato-text text">{{ "%.2f"|format(p.avg_rating) }}</td>
+                                    <td class="lato-text text">{{ p.rating_count }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="lato-text text gray-text ana-footnote">
+                        Note: Ratings list includes products with at least a few reviews (to avoid 1-review bias).
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function () {
+            // One-line safe JSON injection avoids ALL Jinja brace errors.
+            const SNAPSHOT = {{ snapshot | tojson
+        }};
+
+        function el(id) { return document.getElementById(id); }
+
+        function makeBar(canvas, labels, data, label) {
+            if (!canvas) return;
+            new Chart(canvas, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{ label: label, data: data }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function makeDoughnut(canvas, labels, data) {
+            if (!canvas) return;
+            new Chart(canvas, {
+                type: "doughnut",
+                data: { labels: labels, datasets: [{ data: data }] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: "bottom" } }
+                }
+            });
+        }
+
+        // Orders
+        makeBar(
+            el("chart-orders"),
+            ["Today", "This Week", "This Month"],
+            [SNAPSHOT.orders.orders_today, SNAPSHOT.orders.orders_this_week, SNAPSHOT.orders.orders_this_month],
+            "Orders"
+        );
+
+        // Revenue
+        makeBar(
+            el("chart-revenue"),
+            ["Today", "This Week", "This Month"],
+            [SNAPSHOT.revenue.revenue_today, SNAPSHOT.revenue.revenue_this_week, SNAPSHOT.revenue.revenue_this_month],
+            "Revenue ($)"
+        );
+
+        // Payments
+        makeDoughnut(
+            el("chart-payments"),
+            ["COD", "Online"],
+            [SNAPSHOT.payments.cod_count, SNAPSHOT.payments.online_count]
+        );
+
+        // Top sold by qty
+        const soldLabels = (SNAPSHOT.products.top_sold_by_qty || []).map(p => p.name || ("Product " + p.product_id));
+        const soldData = (SNAPSHOT.products.top_sold_by_qty || []).map(p => p.qty || 0);
+        makeBar(el("chart-top-sold"), soldLabels, soldData, "Qty Sold");
+
+        // Top ordered by order count
+        const ordLabels = (SNAPSHOT.products.top_ordered_by_order_count || []).map(p => p.name || ("Product " + p.product_id));
+        const ordData = (SNAPSHOT.products.top_ordered_by_order_count || []).map(p => p.order_count || 0);
+        makeBar(el("chart-top-ordered"), ordLabels, ordData, "Order Count");
+
+        // Most viewed
+        const viewLabels = (SNAPSHOT.products.top_viewed || []).map(p => p.name || ("Product " + p.product_id));
+        const viewData = (SNAPSHOT.products.top_viewed || []).map(p => p.views || 0);
+        makeBar(el("chart-top-viewed"), viewLabels, viewData, "Views");
+
+        // Top rated (avg)
+        const rateLabels = (SNAPSHOT.products.top_rated || []).map(p => p.name || ("Product " + p.product_id));
+        const rateData = (SNAPSHOT.products.top_rated || []).map(p => p.avg_rating || 0);
+        makeBar(el("chart-top-rated"), rateLabels, rateData, "Avg Rating");
+  }) ();
+    </script>
+</body>
+
+</html>

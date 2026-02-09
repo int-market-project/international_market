@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{page_title}}</title>
+    <link rel="stylesheet" href="/css/admin-main.css">
+    <link rel="stylesheet" href="/css/admin-login.css">
+    <link rel="stylesheet" href="/css/admin-customers.css">
+</head>
+
+<body>
+    <header class="admin-section admin-header">
+        <div class="admin-header-home-button">
+            <a href="/core/ops/admin/dashboard" class="quicksand-text white-text text">Home</a>
+        </div>
+        <div class="admin-header-home-button">
+            <a target="_blank" href="/" class="quicksand-text white-text text">Go to Store</a>
+        </div>
+        <div class="admin-header-logout-button">
+            <a href="/core/ops/admin/logout" class="quicksand-text white-text text">Signout</a>
+        </div>
+    </header>
+    <section class="admin-section admin-page-title">
+        <h1 class="rhino-text quicksand-text title">Admin Panel</h1>
+    </section>
+    <script>
+        (async function adminGuard() {
+            try {
+                // Call auth check endpoint (cookie is sent automatically by browser)
+                const res = await fetch("/core/ops/admin/api/auth/check", {
+                    method: "GET",
+                    credentials: "same-origin",
+                    cache: "no-store",
+                });
+
+                if (!res.ok) {
+                    // Not logged in → send to admin login
+                    window.location.replace("/core/ops/admin/login");
+                    return;
+                }
+            } catch (err) {
+                // If server unreachable or anything weird → safer to go login
+                window.location.replace("/core/ops/admin/login");
+            }
+        })();
+    </script>
+    <section class="admin-section">
+        <div class="cust-results-wrap">
+
+            <div class="cust-top">
+                <div class="cust-title-block">
+                    <h2 class="rhino-text quicksand-text sub-title">{{ heading }}</h2>
+                    <p class="lato-text text gray-text">
+                        Found <span class="cust-count">{{ count }}</span> customer(s).
+                    </p>
+                </div>
+
+                <div class="cust-actions">
+                    <a href="/core/ops/admin/dashboard/look-up-customer" class="cust-back-btn quicksand-text text">
+                        ← Back
+                    </a>
+                </div>
+            </div>
+
+            <!-- Search summary -->
+            <div class="cust-filters">
+                <span class="cust-chip lato-text text">
+                    ID: <b>{{ filters.customer_id if filters.customer_id else "—" }}</b>
+                </span>
+                <span class="cust-chip lato-text text">
+                    Email: <b>{{ filters.email if filters.email else "—" }}</b>
+                </span>
+                <span class="cust-chip lato-text text">
+                    First: <b>{{ filters.first_name if filters.first_name else "—" }}</b>
+                </span>
+                <span class="cust-chip lato-text text">
+                    Last: <b>{{ filters.last_name if filters.last_name else "—" }}</b>
+                </span>
+                <span class="cust-chip lato-text text">
+                    Phone: <b>{{ filters.phone if filters.phone else "—" }}</b>
+                </span>
+            </div>
+
+            <!-- Results -->
+            <div class="cust-results-list">
+
+                {% if customers and customers|length > 0 %}
+                {% for c in customers %}
+                <div class="cust-card">
+                    <div class="cust-card-top">
+                        <div class="cust-name rhino-text quicksand-text text">
+                            {% if c.first_name or c.last_name %}
+                            {{ c.first_name }} {{ c.last_name }}
+                            {% else %}
+                            (No Name)
+                            {% endif %}
+                        </div>
+                        <div class="cust-id quicksand-text text">
+                            ID: <span class="lato-text text">{{ c.customer_id }}</span>
+                        </div>
+                    </div>
+
+                    <div class="cust-card-grid">
+                        <div class="cust-field">
+                            <div class="cust-label lato-text text gray-text">Email</div>
+                            <div class="cust-value lato-text text">{{ c.email if c.email else "—" }}</div>
+                        </div>
+
+                        <div class="cust-field">
+                            <div class="cust-label lato-text text gray-text">Phone</div>
+                            <div class="cust-value lato-text text">{{ c.phone if c.phone else "—" }}</div>
+                        </div>
+
+                        <div class="cust-field">
+                            <div class="cust-label lato-text text gray-text">First Name</div>
+                            <div class="cust-value lato-text text">{{ c.first_name if c.first_name else "—" }}</div>
+                        </div>
+
+                        <div class="cust-field">
+                            <div class="cust-label lato-text text gray-text">Last Name</div>
+                            <div class="cust-value lato-text text">{{ c.last_name if c.last_name else "—" }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="cust-empty">
+                    <h3 class="rhino-text quicksand-text sub-sub-title">No customers found</h3>
+                    <p class="lato-text text gray-text">
+                        Try searching with fewer fields or partial values.
+                    </p>
+                    <a href="/core/ops/admin/dashboard/look-up-customer" class="cust-back-btn quicksand-text text">
+                        ← Back to Search
+                    </a>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>
