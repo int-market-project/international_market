@@ -31,6 +31,7 @@ from database import *
 from methods import send_email
 
 load_dotenv()
+
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "").strip()
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "").strip()
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "http://localhost:8001").strip()
@@ -848,13 +849,23 @@ async def api_apply_coupon(request: Request):
     except (TypeError, ValueError):
         subtotal = 0.0
 
+    # ✅ NEW: shipping fee from client (cart page already knows it)
+    shipping_raw = body.get("shipping_fee", 0)
+    try:
+        shipping_fee = float(shipping_raw)
+    except (TypeError, ValueError):
+        shipping_fee = 0.0
+
+    subtotal = max(0.0, subtotal)
+    shipping_fee = max(0.0, shipping_fee)
+
     customer_id = int(current_customer["customer_id"])
 
     result = validate_coupon_for_subtotal(code=code, customer_id=customer_id, subtotal=subtotal)
 
     # Always return totals so UI can update/reset cleanly
     if not result.get("ok"):
-        totals = compute_totals(subtotal=subtotal, discount_amount=0.0)
+        totals = compute_totals(subtotal=subtotal, discount_amount=0.0, shipping_fee=shipping_fee)
         return JSONResponse(
             content={
                 "ok": False,
@@ -864,7 +875,7 @@ async def api_apply_coupon(request: Request):
         )
 
     discount_amount = float(result["discount_amount"])
-    totals = compute_totals(subtotal=subtotal, discount_amount=discount_amount)
+    totals = compute_totals(subtotal=subtotal, discount_amount=discount_amount, shipping_fee=shipping_fee)
 
     return JSONResponse(
         content={
@@ -2222,7 +2233,6 @@ async def admin_api_delete_product(request: Request, product_id: int):
     return {"ok": True, "product_id": int(product_id)}
 
 
-
 def _amount_to_cents(amount: float) -> int:
     return int(round(float(amount) * 100))
 
@@ -2275,6 +2285,17 @@ async def api_checkout_place(request: Request, payload: ShippingSubmitIn):
 
     # COD
     if payload.payment_method == "cod":
+
+        # ✅ MARK COUPON AS USED (IMPORTANT)
+        coupon_code = (draft.get("coupon_code") or "").strip().upper()
+        if coupon_code:
+            mark = mark_coupon_used(coupon_code, customer_id)
+            if not mark.get("ok"):
+                return JSONResponse(
+                    status_code=400,
+                    content={"ok": False, "message": mark.get("message")}
+                )
+
         order_id = create_order_from_draft(
             customer_id=customer_id,
             draft=draft,
@@ -2294,15 +2315,12 @@ async def api_checkout_place(request: Request, payload: ShippingSubmitIn):
         )
         attach_transaction_to_order(order_id, tx_id)
 
-        # Clear cart + draft
         empty_cart(customer_id)
         delete_checkout_draft(customer_id)
 
         return {"ok": True, "redirect": f"/order/confirmation/{order_id}"}
 
-    # Online will be handled by /api/checkout/stripe-session
     return JSONResponse(status_code=400, content={"ok": False, "message": "Invalid payment flow."})
-
 
 
 @app.post("/api/checkout/stripe-session")
@@ -2374,13 +2392,19 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
             metadata = obj.get("metadata", {}) or {}
             customer_id = int(metadata.get("customer_id", 0) or 0)
 
-            # ✅ payment intent exists now
             payment_intent_id = obj.get("payment_intent")
 
-            if not customer_id:
+            if not customer_id or not payment_intent_id:
                 return PlainTextResponse("ok", status_code=200)
-    
-            # ✅ Get the saved draft (includes totals + items + shipping info)
+
+            # ✅ PREVENT DUPLICATE ORDERS (STRIPE RETRIES)
+            existing = transaction_logs.find_one(
+                {"provider": "stripe", "provider_payment_intent_id": payment_intent_id},
+                {"_id": 1}
+            )
+            if existing:
+                return PlainTextResponse("ok", status_code=200)
+
             draft = get_checkout_draft(customer_id)
             if not draft:
                 return PlainTextResponse("ok", status_code=200)
@@ -2391,7 +2415,14 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
             if not shipping_address:
                 return PlainTextResponse("ok", status_code=200)
 
-            # ✅ Create order ONLY AFTER payment success
+            # ✅ MARK COUPON AS USED (IMPORTANT)
+            coupon_code = (draft.get("coupon_code") or "").strip().upper()
+            if coupon_code:
+                mark = mark_coupon_used(coupon_code, customer_id)
+                if not mark.get("ok"):
+                    print("COUPON MARK FAILED:", mark.get("message"))
+                    return PlainTextResponse("ok", status_code=200)
+
             order_id = create_order_from_draft(
                 customer_id=customer_id,
                 draft=draft,
@@ -2400,7 +2431,6 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
                 notes=notes,
             )
 
-            # ✅ Create succeeded transaction log ONLY AFTER success
             tx_id = create_transaction_log(
                 order_id=order_id,
                 customer_id=customer_id,
@@ -2412,20 +2442,14 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
             )
             attach_transaction_to_order(order_id, tx_id)
 
-            # ✅ Remove mark_order_paid(order_id)
-            # Payment success is already represented by transaction_logs.status = "succeeded"
-
-            # ✅ Clear cart + delete draft
             empty_cart(customer_id)
             delete_checkout_draft(customer_id)
 
         return PlainTextResponse("ok", status_code=200)
 
     except Exception as e:
-        # This will show the REAL reason in your FastAPI terminal
         print("STRIPE WEBHOOK ERROR:", repr(e))
         return PlainTextResponse("webhook error", status_code=500)
-
 
 @app.get("/order/stripe-success", response_class=HTMLResponse)
 async def stripe_success(request: Request):
@@ -2476,8 +2500,6 @@ async def order_confirmation(request: Request, order_id: int):
             **shared,
         }
     )
-
-
 
 @app.get("/api/settings/shipping-fee")
 async def api_get_shipping_fee(request: Request):
@@ -3670,8 +3692,6 @@ async def admin_api_reply_message(
 
     # 3) Go back to unreplied messages list (page reload)
     return RedirectResponse(url="/core/ops/admin/dashboard/all-messages/", status_code=302)
-
-
 
 
 
