@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{page_title}}</title>
+    <link rel="stylesheet" href="/css/admin-main.css">
+    <link rel="stylesheet" href="/css/admin-login.css">
+    <link rel="stylesheet" href="/css/admin-coupon.css">
+</head>
+
+<body>
+    <header class="admin-section admin-header">
+        <div class="admin-header-home-button">
+            <a href="/core/ops/admin/dashboard" class="quicksand-text white-text text">Home</a>
+        </div>
+        <div class="admin-header-home-button">
+            <a target="_blank" href="/" class="quicksand-text white-text text">Go to Store</a>
+        </div>
+        <div class="admin-header-logout-button">
+            <a href="/core/ops/admin/logout" class="quicksand-text white-text text">Signout</a>
+        </div>
+    </header>
+    <section class="admin-section admin-page-title">
+        <h1 class="rhino-text quicksand-text title">Admin Panel</h1>
+    </section>
+    <script>
+        (async function adminGuard() {
+            try {
+                // Call auth check endpoint (cookie is sent automatically by browser)
+                const res = await fetch("/core/ops/admin/api/auth/check", {
+                    method: "GET",
+                    credentials: "same-origin",
+                    cache: "no-store",
+                });
+
+                if (!res.ok) {
+                    // Not logged in → send to admin login
+                    window.location.replace("/core/ops/admin/login");
+                    return;
+                }
+            } catch (err) {
+                // If server unreachable or anything weird → safer to go login
+                window.location.replace("/core/ops/admin/login");
+            }
+        })();
+    </script>
+    <section class="admin-section">
+        <div class="ccf-wrap">
+
+            <!-- top row -->
+            <div class="ccf-top">
+                <div class="ccf-left">
+                    <h2 class="rhino-text quicksand-text sub-title">{{ heading }}</h2>
+                    <p class="lato-text text gray-text">
+                        {% if mode == "add" %}
+                        Create a new coupon code and save it to the database.
+                        {% else %}
+                        Update the coupon code settings and save changes.
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="ccf-right">
+                    <a href="/core/ops/admin/dashboard/manage-coupon-codes" class="ccf-back-btn quicksand-text text">
+                        ← Back
+                    </a>
+                </div>
+            </div>
+
+            {% if error %}
+            <div class="ccf-error lato-text text">{{ error }}</div>
+            {% endif %}
+
+            <!-- form -->
+            <form id="couponForm" method="post"
+                action="{% if mode == 'add' %}/core/ops/admin/api/coupon-codes/create{% else %}/core/ops/admin/api/coupon-codes/update/{{ coupon.code }}{% endif %}"
+                class="ccf-form">
+
+                <!-- CODE (immutable on edit) -->
+                <div class="ccf-row">
+                    <label class="lato-text text gray-text">
+                        Code <span class="ccf-required">*</span>
+                    </label>
+
+                    {% if mode == "add" %}
+                    <input class="ccf-input lato-text text gray-text" type="text" name="code" minlength="2"
+                        maxlength="32" placeholder="SAVE10" required>
+                    {% else %}
+                    <input class="ccf-input lato-text text gray-text" type="text" value="{{ coupon.code }}" disabled>
+                    <!-- keep code readable server-side via URL; no need to submit -->
+                    {% endif %}
+
+                    <p class="ccf-hint lato-text text gray-text">
+                        Uppercase recommended. Must be unique. Example: WELCOME10
+                    </p>
+                </div>
+
+                <!-- TITLE -->
+                <div class="ccf-row">
+                    <label class="lato-text text gray-text">
+                        Title <span class="ccf-required">*</span>
+                    </label>
+                    <input class="ccf-input lato-text text gray-text" type="text" name="title" maxlength="80"
+                        placeholder="{% if coupon %}{{ coupon.title }}{% else %}Welcome 10% Off{% endif %}"
+                        value="{% if coupon %}{{ coupon.title }}{% endif %}" required>
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="ccf-row">
+                    <label class="lato-text text gray-text">
+                        Description
+                    </label>
+                    <input class="ccf-input lato-text text gray-text" type="text" name="description" maxlength="250"
+                        placeholder="{% if coupon %}{{ coupon.description }}{% else %}10% off orders over $20{% endif %}"
+                        value="{% if coupon %}{{ coupon.description }}{% endif %}">
+                </div>
+
+                <!-- DISCOUNT TYPE + VALUE -->
+                <div class="ccf-grid-2">
+
+                    <div class="ccf-row">
+                        <label class="lato-text text gray-text">
+                            Discount Type <span class="ccf-required">*</span>
+                        </label>
+                        <select class="ccf-select lato-text text gray-text" name="discount_type" required>
+                            <option value="percent" {% if coupon and coupon.discount_type=="percent" %}selected{% endif
+                                %}>
+                                Percent (%)
+                            </option>
+                            <option value="amount" {% if coupon and coupon.discount_type=="amount" %}selected{% endif
+                                %}>
+                                Amount ($)
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="ccf-row">
+                        <label class="lato-text text gray-text">
+                            Discount Value <span class="ccf-required">*</span>
+                        </label>
+                        <input class="ccf-input lato-text text gray-text" type="text" name="discount_value"
+                            placeholder="{% if coupon %}{{ coupon.discount_value }}{% else %}10{% endif %}"
+                            value="{% if coupon %}{{ coupon.discount_value }}{% endif %}" required>
+                        <p class="ccf-hint lato-text text gray-text">
+                            If type is Percent, 10 = 10%. If type is Amount, 10 = $10 off.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- MIN ORDER SUBTOTAL + MAX USES -->
+                <div class="ccf-grid-2">
+
+                    <div class="ccf-row">
+                        <label class="lato-text text gray-text">
+                            Minimum Order Subtotal
+                        </label>
+                        <input class="ccf-input lato-text text gray-text" type="text" name="min_order_subtotal"
+                            placeholder="{% if coupon %}{{ coupon.min_order_subtotal }}{% else %}20{% endif %}"
+                            value="{% if coupon %}{{ coupon.min_order_subtotal }}{% endif %}">
+                    </div>
+
+                    <div class="ccf-row">
+                        <label class="lato-text text gray-text">
+                            Max Uses Total
+                        </label>
+                        <input class="ccf-input lato-text text gray-text" type="text" name="max_uses_total"
+                            placeholder="{% if coupon %}{{ coupon.max_uses_total }}{% else %}0{% endif %}"
+                            value="{% if coupon %}{{ coupon.max_uses_total }}{% endif %}">
+                        <p class="ccf-hint lato-text text gray-text">
+                            0 = unlimited.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- AUDIENCE + ELIGIBLE IDs -->
+                <div class="ccf-grid-2">
+
+                    <div class="ccf-row">
+                        <label class="lato-text text gray-text">
+                            Audience <span class="ccf-required">*</span>
+                        </label>
+                        <select id="audienceSelect" class="ccf-select lato-text text gray-text" name="audience"
+                            required>
+                            <option value="all" {% if not coupon or coupon.audience=="all" %}selected{% endif %}>
+                                All Customers
+                            </option>
+                            <option value="customers" {% if coupon and coupon.audience=="customers" %}selected{% endif
+                                %}>
+                                Specific Customers
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="ccf-row">
+                        <label class="lato-text text gray-text">
+                            Eligible Customer IDs
+                        </label>
+
+                        <!-- this is what endpoints expect -->
+                        <input id="eligibleIdsInput" class="ccf-input lato-text text gray-text" type="text"
+                            name="eligible_customer_ids_csv"
+                            placeholder="{% if coupon and coupon.eligible_customer_ids %}{{ coupon.eligible_customer_ids | join(', ') }}{% else %}e.g. 2,7,11{% endif %}"
+                            value="{% if coupon and coupon.eligible_customer_ids %}{{ coupon.eligible_customer_ids | join(', ') }}{% endif %}">
+
+                        <p id="eligibleIdsHint" class="ccf-hint lato-text text gray-text">
+                            Enter comma-separated IDs only when Audience = Specific Customers.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- START / END -->
+                <div class="ccf-grid-2">
+
+                    <div class="ccf-row">
+                        <label class="lato-text text gray-text">
+                            Starts At
+                        </label>
+                        <input class="ccf-input lato-text text gray-text" type="datetime-local" name="starts_at"
+                            value="{% if coupon and coupon.starts_at %}{{ coupon.starts_at.strftime('%Y-%m-%dT%H:%M') }}{% endif %}">
+                    </div>
+
+                    <div class="ccf-row">
+                        <label class="lato-text text gray-text">
+                            Ends At
+                        </label>
+                        <input class="ccf-input lato-text text gray-text" type="datetime-local" name="ends_at"
+                            value="{% if coupon and coupon.ends_at %}{{ coupon.ends_at.strftime('%Y-%m-%dT%H:%M') }}{% endif %}">
+                    </div>
+
+                </div>
+
+                <!-- SUBMIT -->
+                <div class="ccf-actions">
+                    <button type="submit" class="ccf-save-btn quicksand-text text">
+                        {% if mode == "add" %}Add Coupon Code{% else %}Save Changes{% endif %}
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </section>
+    <script>
+        (function () {
+            const audienceSelect = document.getElementById("audienceSelect");
+            const eligibleInput = document.getElementById("eligibleIdsInput");
+            const hint = document.getElementById("eligibleIdsHint");
+            const form = document.getElementById("couponForm");
+
+            if (!audienceSelect || !eligibleInput || !form) return;
+
+            function setEligibleState() {
+                const audience = (audienceSelect.value || "all").toLowerCase();
+
+                if (audience === "all") {
+                    eligibleInput.value = "";
+                    eligibleInput.disabled = true;
+                    eligibleInput.classList.add("ccf-disabled");
+                    if (hint) hint.textContent = "Audience is All Customers, so eligible IDs are not needed.";
+                } else {
+                    eligibleInput.disabled = false;
+                    eligibleInput.classList.remove("ccf-disabled");
+                    if (hint) hint.textContent = "Enter comma-separated customer IDs. Example: 2,7,11";
+                }
+            }
+
+            function cleanCsvInput() {
+                // Allow only digits, commas, spaces
+                eligibleInput.value = (eligibleInput.value || "").replace(/[^\d,\s]/g, "");
+            }
+
+            function hasAtLeastOneId(csv) {
+                const parts = (csv || "").split(",").map(p => p.trim()).filter(Boolean);
+                // ensure at least one numeric
+                return parts.some(p => /^\d+$/.test(p));
+            }
+
+            audienceSelect.addEventListener("change", setEligibleState);
+            eligibleInput.addEventListener("input", cleanCsvInput);
+
+            form.addEventListener("submit", (e) => {
+                const audience = (audienceSelect.value || "all").toLowerCase();
+
+                if (audience === "customers") {
+                    const csv = eligibleInput.value || "";
+                    if (!hasAtLeastOneId(csv)) {
+                        e.preventDefault();
+                        alert("Please enter at least one eligible customer ID (comma-separated).");
+                        eligibleInput.focus();
+                        return;
+                    }
+                }
+            });
+
+            // init
+            setEligibleState();
+        })();
+    </script>
+</body>
+
+</html>

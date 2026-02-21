@@ -1,0 +1,72 @@
+/* === LOGIN PAGE === */
+
+.login-page-main-section {
+    background-color: var(--white);
+    padding: 100px 1%;
+}
+
+.login-page-container {
+    width: 100%;
+}
+
+.login-page-title {
+    margin-bottom: 20px;
+}
+
+.login-card {
+    background-color: var(--white);
+    border: 1px solid var(--gray-line);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    padding: 30px;
+}
+
+.login-form-row {
+    margin-bottom: 18px;
+}
+
+.login-form-label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.login-required-star {
+    color: #e53935;
+    margin-left: 2px;
+}
+
+.login-input-wrapper {
+    position: relative;
+}
+
+.login-input {
+    width: 100%;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: 1px solid var(--gray-line);
+    outline: none;
+}
+
+.login-input:focus {
+    border-color: var(--ocean-green);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.login-form-footer {
+    margin-top: 10px;
+}
+
+.login-btn {
+    background: var(--ocean-green);
+    border: none;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 3px;
+    transition: background 0.3s ease;
+    cursor: pointer;
+}
+
+.login-btn:hover {
+    background: var(--yellow-orange);
+}
+

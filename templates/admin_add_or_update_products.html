@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{page_title}}</title>
+    <link rel="stylesheet" href="/css/admin-main.css">
+    <link rel="stylesheet" href="/css/admin-login.css">
+    <link rel="stylesheet" href="/css/admin-products.css">
+</head>
+
+<body>
+    <header class="admin-section admin-header">
+        <div class="admin-header-home-button">
+            <a href="/core/ops/admin/dashboard" class="quicksand-text white-text text">Home</a>
+        </div>
+        <div class="admin-header-home-button">
+            <a target="_blank" href="/" class="quicksand-text white-text text">Go to Store</a>
+        </div>
+        <div class="admin-header-logout-button">
+            <a href="/core/ops/admin/logout" class="quicksand-text white-text text">Signout</a>
+        </div>
+    </header>
+    <section class="admin-section admin-page-title">
+        <h1 class="rhino-text quicksand-text title">Admin Panel</h1>
+    </section>
+    <script>
+        (async function adminGuard() {
+            try {
+                // Call auth check endpoint (cookie is sent automatically by browser)
+                const res = await fetch("/core/ops/admin/api/auth/check", {
+                    method: "GET",
+                    credentials: "same-origin",
+                    cache: "no-store",
+                });
+
+                if (!res.ok) {
+                    // Not logged in → send to admin login
+                    window.location.replace("/core/ops/admin/login");
+                    return;
+                }
+            } catch (err) {
+                // If server unreachable or anything weird → safer to go login
+                window.location.replace("/core/ops/admin/login");
+            }
+        })();
+    </script>
+    <section class="admin-section">
+        <div class="prod-form-wrap">
+
+            <div class="prod-page-top">
+                <div>
+                    <h2 class="rhino-text quicksand-text sub-title">{{ heading }}</h2>
+                    <p class="lato-text text gray-text">
+                        {% if mode == "add" %}Create a new product{% else %}Update product settings{% endif %}
+                    </p>
+                </div>
+
+                <div class="prod-actions">
+                    <a href="/core/ops/admin/dashboard/look-up-product" class="prod-action-btn quicksand-text text">
+                        ← Back
+                    </a>
+                </div>
+            </div>
+
+            {% if error %}
+            <div class="prod-error lato-text text">{{ error }}</div>
+            {% endif %}
+
+            <form id="productForm" method="post" enctype="multipart/form-data"
+                action="{% if mode == 'add' %}/core/ops/admin/api/products/create{% else %}/core/ops/admin/api/products/update/{{ product.product_id }}{% endif %}"
+                class="prod-form">
+
+                <div class="prod-grid-2">
+                    <div>
+                        <label class="lato-text text gray-text">Product ID</label>
+                        {% if mode == "add" %}
+                        <input class="prod-input" type="text" name="product_id" value="{{ product.product_id }}"
+                            required>
+                        {% else %}
+                        <input class="prod-input" type="text" value="{{ product.product_id }}" disabled>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="lato-text text gray-text">Name *</label>
+                        <input class="prod-input" type="text" name="name" value="{{ product.name if product else '' }}"
+                            required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="lato-text text gray-text">Description</label>
+                    <input class="prod-input" type="text" name="description"
+                        value="{{ product.description if product else '' }}">
+                </div>
+
+                <div>
+                    <label class="lato-text text gray-text">Long Description</label>
+                    <textarea class="prod-textarea" name="long_description"
+                        placeholder="Write full detailed description...">{{ product.long_description if product else '' }}</textarea>
+                </div>
+
+                <div class="prod-grid-2">
+                    <div>
+                        <label class="lato-text text gray-text">Stock Qty</label>
+                        <input class="prod-input" type="text" name="stock_qty"
+                            value="{{ product.stock_qty if product else '' }}">
+                    </div>
+
+                    <div>
+                        <label class="lato-text text gray-text">Brand</label>
+                        <input class="prod-input" type="text" name="Brand"
+                            value="{{ product.Brand if product else '' }}">
+                    </div>
+                </div>
+
+                <div class="prod-grid-2">
+                    <div>
+                        <label class="lato-text text gray-text">Category</label>
+                        <select id="categorySelect" name="category_id" class="prod-select">
+                            <option value="all" {% if product.category_id=="all" %}selected{% endif %}>All</option>
+                            {% for c in categories_with_subcategories %}
+                            <option value="{{ c.slug }}" {% if product.category_id==c.slug %}selected{% endif %}>
+                                {{ c.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="lato-text text gray-text">Subcategory</label>
+                        <select id="subcategorySelect" name="sub_category_id" class="prod-select">
+                            <option value="all" {% if product.sub_category_id=="all" %}selected{% endif %}>All</option>
+                            <!-- JS will populate based on selected category and default selection -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="prod-grid-2">
+                    <div>
+                        <label class="lato-text text gray-text">Price</label>
+                        <input class="prod-input" type="text" name="price"
+                            value="{{ product.price if product else '' }}">
+                    </div>
+
+                    <div>
+                        <label class="lato-text text gray-text">Discounted Price</label>
+                        <input class="prod-input" type="text" name="discounted_price"
+                            value="{{ product.discounted_price if product else '' }}">
+                    </div>
+                </div>
+
+                <div class="prod-grid-2">
+                    <div>
+                        <label class="lato-text text gray-text">Unit</label>
+                        <input class="prod-input" type="text" name="unit" value="{{ product.unit if product else '' }}">
+                    </div>
+
+                    <div>
+                        <label class="lato-text text gray-text">Size</label>
+                        <input class="prod-input" type="text" name="size" value="{{ product.size if product else '' }}">
+                    </div>
+                </div>
+
+                <div class="prod-checks">
+                    <label class="prod-checkbox lato-text text gray-text">
+                        <input type="checkbox" name="is_featured" value="on" {% if product.is_featured %}checked{% endif
+                            %}>
+                        Featured
+                    </label>
+
+                    <label class="prod-checkbox lato-text text gray-text">
+                        <input type="checkbox" name="is_hot_deal" value="on" {% if product.is_hot_deal %}checked{% endif
+                            %}>
+                        Hot Deal
+                    </label>
+                </div>
+
+                {% if mode == "update" and product.image_file_ids and product.image_file_ids|length > 0 %}
+                <div>
+                    <label class="lato-text text gray-text">Current Images</label>
+
+                    <div class="prod-image-preview">
+                        {% for fid in product.image_file_ids %}
+                        <div class="prod-image-card">
+                            <img class="prod-image-thumb" src="/core/ops/images/{{ fid }}" alt="Product image">
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <p class="lato-text text gray-text prod-hint">
+                        Uploading new images will replace the current ones.
+                    </p>
+                </div>
+                {% endif %}
+
+                <div>
+                    <label class="lato-text text gray-text">Upload Images (select one or multiple)</label>
+
+                    <input class="prod-input" type="file" id="productImages" name="images" accept="image/*" multiple />
+
+                    <p class="lato-text text gray-text prod-hint">
+                        Tip: You can select multiple images at once. The first image can be used as the primary image on
+                        the website.
+                    </p>
+
+                    <div id="imagePreview" class="prod-image-preview"></div>
+                </div>
+                <button type="submit" class="prod-primary-btn quicksand-text text">
+                    {% if mode == "add" %}Add Product{% else %}Update Product{% endif %}
+                </button>
+
+            </form>
+        </div>
+    </section>
+    <script>
+        (function () {
+            const CATS = {{ categories_with_subcategories | tojson
+        }};
+        const categorySelect = document.getElementById("categorySelect");
+        const subcategorySelect = document.getElementById("subcategorySelect");
+
+        // defaults from server product object
+        const defaultCategory = "{{ product.category_id }}";
+        const defaultSub = "{{ product.sub_category_id }}";
+
+        function getSubcategoriesFor(catSlug) {
+            const cat = (CATS || []).find(c => c.slug === catSlug);
+            return cat ? (cat.subcategories || []) : [];
+        }
+
+        function clearOptions(selectEl) {
+            while (selectEl.firstChild) selectEl.removeChild(selectEl.firstChild);
+        }
+
+        function addOption(selectEl, value, text, selected) {
+            const opt = document.createElement("option");
+            opt.value = value;
+            opt.textContent = text;
+            if (selected) opt.selected = true;
+            selectEl.appendChild(opt);
+        }
+
+        function renderSubcategories(catSlug, selectedSub) {
+            clearOptions(subcategorySelect);
+
+            // always include All option
+            addOption(subcategorySelect, "all", "All", selectedSub === "all");
+
+            if (catSlug === "all") {
+                subcategorySelect.value = "all";
+                subcategorySelect.disabled = true;
+                return;
+            }
+
+            subcategorySelect.disabled = false;
+
+            const subs = getSubcategoriesFor(catSlug);
+            subs.forEach(s => addOption(subcategorySelect, s.slug, s.name, s.slug === selectedSub));
+
+            // if selected not found -> all
+            const exists = Array.from(subcategorySelect.options).some(o => o.value === selectedSub);
+            subcategorySelect.value = exists ? selectedSub : "all";
+        }
+
+        if (!categorySelect || !subcategorySelect) return;
+
+        // init
+        if (defaultCategory) categorySelect.value = defaultCategory;
+        renderSubcategories(categorySelect.value || "all", defaultSub || "all");
+
+        categorySelect.addEventListener("change", () => {
+            const cat = categorySelect.value || "all";
+            // reset subcategory on category change
+            renderSubcategories(cat, "all");
+        });
+}) ();
+    </script>
+    <script>
+        (function () {
+            const input = document.getElementById("productImages");
+            const preview = document.getElementById("imagePreview");
+            if (!input || !preview) return;
+
+            function clearPreview() {
+                preview.innerHTML = "";
+            }
+
+            function addThumb(file) {
+                const card = document.createElement("div");
+                card.className = "prod-image-card";
+
+                const img = document.createElement("img");
+                img.className = "prod-image-thumb";
+                img.alt = file.name;
+
+                const meta = document.createElement("div");
+                meta.className = "prod-image-meta lato-text text gray-text";
+                meta.textContent = `${file.name} • ${Math.round(file.size / 1024)} KB`;
+
+                card.appendChild(img);
+                card.appendChild(meta);
+                preview.appendChild(card);
+
+                const reader = new FileReader();
+                reader.onload = (e) => { img.src = e.target.result; };
+                reader.readAsDataURL(file);
+            }
+
+            input.addEventListener("change", () => {
+                clearPreview();
+                const files = Array.from(input.files || []);
+                files.forEach(addThumb);
+            });
+        })();
+    </script>
+</body>
+
+</html>

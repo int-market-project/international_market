@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{page_title}}</title>
+    <link rel="stylesheet" href="/css/admin-main.css">
+    <link rel="stylesheet" href="/css/admin-login.css">
+</head>
+
+<body>
+    <header class="admin-section admin-header">
+        <div class="admin-header-home-button">
+            <a href="/core/ops/admin/dashboard" class="quicksand-text white-text text">Home</a>
+        </div>
+        <div class="admin-header-home-button">
+            <a target="_blank" href="/" class="quicksand-text white-text text">Go to Store</a>
+        </div>
+        <div class="admin-header-logout-button">
+            <a href="/core/ops/admin/logout" class="quicksand-text white-text text">Signout</a>
+        </div>
+    </header>
+    <section class="admin-section admin-page-title">
+        <h1 class="rhino-text quicksand-text title">Admin Panel</h1>
+    </section>
+    <section class="admin-section">
+        <div class="admin-auth-wrap">
+            <div class="admin-auth-card">
+                <h2 class="rhino-text quicksand-text sub-title">Sign In</h2>
+
+                {% if error %}
+                <div class="admin-auth-error lato-text text">{{ error }}</div>
+                {% endif %}
+
+                <form id="adminLoginForm" method="post" action="/core/ops/admin/login">
+                    <div class="admin-auth-row">
+                        <label class="lato-text text gray-text">Username<span class="admin-required">*</span></label>
+                        <input id="adminUsername" name="username" class="admin-auth-input lato-text text gray-text"
+                            type="text" placeholder="Username" autocomplete="username" required>
+                    </div>
+
+                    <div class="admin-auth-row">
+                        <label class="lato-text text gray-text">Password<span class="admin-required">*</span></label>
+                        <!-- raw password (server fallback), but JS will hash it before submit -->
+                        <input id="adminPassword" name="password" class="admin-auth-input lato-text text gray-text"
+                            type="password" placeholder="Password" autocomplete="current-password" required>
+                    </div>
+
+                    <!-- JS will fill this with sha256(password) -->
+                    <input type="hidden" id="adminPasswordHash" name="password_hash" value="">
+
+                    <div class="admin-auth-actions">
+                        <button id="adminLoginBtn" type="submit" class="admin-auth-btn quicksand-text text">
+                            Continue
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <script>
+        async function sha256Hex(message) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(message);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("adminLoginForm");
+            const passwordEl = document.getElementById("adminPassword");
+            const hashEl = document.getElementById("adminPasswordHash");
+
+            if (!form || !passwordEl || !hashEl) return;
+
+            form.addEventListener("submit", async (e) => {
+                // Hash before submit
+                e.preventDefault();
+
+                const raw = passwordEl.value || "";
+                const hex = await sha256Hex(raw);
+
+                hashEl.value = hex;
+
+                // Optional hardening: clear raw password field so it’s not sent as plaintext
+                // (Server still supports fallback if needed, but we prefer not sending it)
+                passwordEl.value = "";
+
+                form.submit();
+            });
+        });
+    </script>
+</body>
+
+</html>
