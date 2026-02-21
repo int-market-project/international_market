@@ -12,6 +12,10 @@ from pymongo import MongoClient, ReturnDocument
 from pymongo.server_api import ServerApi
 
 from schemas import *
+
+import gridfs
+from bson import ObjectId
+from typing import List, Optional, Any, Dict
 # ------------------------------------------------------------
 # MongoDB connection
 # ------------------------------------------------------------
@@ -45,6 +49,7 @@ admin_sessions = database["admin_sessions"]
 checkout_drafts = database["checkout_drafts"]
 counters = database["counters"]
 messages = database["messages"]
+fs = gridfs.GridFS(database)
 
 # ------------------------------------------------------------
 # CATEGORY HELPERS
@@ -745,7 +750,7 @@ def get_featured_products_summary(limit: int | None = None, customer_id: int | N
         "category_id": 1,
         "price": 1,
         "discounted_price": 1,
-        "image_urls": 1,
+        "image_file_ids": 1,   # ✅ CHANGED
         "Brand": 1,
         "brand": 1,
     }
@@ -755,7 +760,7 @@ def get_featured_products_summary(limit: int | None = None, customer_id: int | N
         cursor = cursor.limit(int(limit))
 
     cart_product_ids = get_cart_product_ids_set(customer_id) if customer_id else set()
-    wishlist_product_ids = get_wishlist_product_ids_set(customer_id) if customer_id else set()  # strings
+    wishlist_product_ids = get_wishlist_product_ids_set(customer_id) if customer_id else set()
 
     results = []
 
@@ -772,8 +777,7 @@ def get_featured_products_summary(limit: int | None = None, customer_id: int | N
             cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
             category_name = cat.get("name", "") if cat else ""
 
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if isinstance(image_urls, list) and image_urls else ""
+        cover_image = _cover_image_from_file_ids(p)  # ✅ CHANGED
 
         in_cart = bool(customer_id) and (product_id is not None) and (int(product_id) in cart_product_ids)
         in_wishlist = bool(customer_id) and (product_id is not None) and (str(product_id) in wishlist_product_ids)
@@ -785,10 +789,10 @@ def get_featured_products_summary(limit: int | None = None, customer_id: int | N
             "category_name": category_name,
             "rating": get_average_rating(product_id),
             "brand": p.get("Brand") or p.get("brand") or "",
-            "cover_image": cover_image,
+            "cover_image": cover_image,  # ✅ still same key
             "price": price,
             "discounted_price": discounted,
-            "percentage_discount": percentage_discount,   # ✅ ONLY THIS KEY
+            "percentage_discount": percentage_discount,
             "in_cart": in_cart,
             "in_wishlist": in_wishlist,
         })
@@ -805,7 +809,7 @@ def get_hot_deals_products_summary(limit: int | None = None, customer_id: int | 
         "category_id": 1,
         "price": 1,
         "discounted_price": 1,
-        "image_urls": 1,
+        "image_file_ids": 1,  # ✅ CHANGED
         "Brand": 1,
         "brand": 1,
     }
@@ -815,7 +819,7 @@ def get_hot_deals_products_summary(limit: int | None = None, customer_id: int | 
         cursor = cursor.limit(int(limit))
 
     cart_product_ids = get_cart_product_ids_set(customer_id) if customer_id else set()
-    wishlist_product_ids = get_wishlist_product_ids_set(customer_id) if customer_id else set()  # strings
+    wishlist_product_ids = get_wishlist_product_ids_set(customer_id) if customer_id else set()
 
     results = []
 
@@ -832,8 +836,7 @@ def get_hot_deals_products_summary(limit: int | None = None, customer_id: int | 
             cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
             category_name = cat.get("name", "") if cat else ""
 
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if isinstance(image_urls, list) and image_urls else ""
+        cover_image = _cover_image_from_file_ids(p)  # ✅ CHANGED
 
         in_cart = bool(customer_id) and (product_id is not None) and (int(product_id) in cart_product_ids)
         in_wishlist = bool(customer_id) and (product_id is not None) and (str(product_id) in wishlist_product_ids)
@@ -848,373 +851,9 @@ def get_hot_deals_products_summary(limit: int | None = None, customer_id: int | 
             "cover_image": cover_image,
             "price": price,
             "discounted_price": discounted,
-            "percentage_discount": percentage_discount,   # ✅ ONLY THIS KEY
+            "percentage_discount": percentage_discount,
             "in_cart": in_cart,
             "in_wishlist": in_wishlist,
-        })
-
-    return results
-    products_duplicate = database["products_duplicate"]
-
-    projection = {
-        "_id": 0,
-        "product_id": 1,
-        "name": 1,
-        "category_id": 1,
-        "price": 1,
-        "discounted_price": 1,
-        "image_urls": 1,
-        "Brand": 1,
-        "brand": 1,
-    }
-
-    cursor = products_duplicate.find({"is_hot_deal": True}, projection)
-    if limit is not None:
-        cursor = cursor.limit(int(limit))
-
-    cart_product_ids = get_cart_product_ids_set(customer_id) if customer_id else set()
-    wishlist_product_ids = get_wishlist_product_ids_set(customer_id) if customer_id else set()
-
-    results = []
-
-    for p in cursor:
-        product_id = p.get("product_id")
-
-        price = p.get("price", 0) or 0
-        discounted = p.get("discounted_price", price)
-        discounted = discounted if discounted is not None else price
-
-        discount_percentage = (
-            int(((price - discounted) / price) * 100)
-            if price and discounted < price else 0
-        )
-
-        category_slug = p.get("category_id", "") or ""
-        category_name = ""
-        if category_slug:
-            cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
-            category_name = cat["name"] if cat else ""
-
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if image_urls else ""
-
-        in_cart = (
-            bool(customer_id) and product_id is not None and int(product_id) in cart_product_ids
-        )
-        in_wishlist = (
-            bool(customer_id) and product_id is not None and str(product_id) in wishlist_product_ids
-        )
-
-        results.append({
-            "product_id": product_id,
-            "name": p.get("name", "") or "",
-            "category_slug": category_slug,
-            "category_name": category_name,
-            "rating": get_average_rating(product_id),
-            "brand": p.get("Brand") or p.get("brand") or "",
-            "cover_image": cover_image,
-            "price": price,
-            "discounted_price": discounted,
-            "discount_percentage": discount_percentage,
-            "in_cart": in_cart,
-            "in_wishlist": in_wishlist,
-        })
-
-    return results
-    products_duplicate = database["products_duplicate"]
-
-    projection = {
-        "_id": 0,
-        "product_id": 1,
-        "name": 1,
-        "category_id": 1,
-        "price": 1,
-        "discounted_price": 1,
-        "image_urls": 1,
-        "Brand": 1,
-        "brand": 1,
-    }
-
-    cursor = products_duplicate.find({"is_hot_deal": True}, projection)
-    if limit:
-        cursor = cursor.limit(int(limit))
-
-    # ✅ cart + wishlist lookup once
-    cart_product_ids = get_cart_product_ids_set(customer_id) if customer_id else set()
-    wishlist_product_ids = get_wishlist_product_ids_set(customer_id) if customer_id else set()
-
-    results = []
-    for p in cursor:
-        product_id = p.get("product_id")
-
-        price = p.get("price", 0) or 0
-        discounted = p.get("discounted_price", price)
-        discounted = discounted if discounted is not None else price
-
-        discount_percentage = (
-            int(((price - discounted) / price) * 100)
-            if price and discounted < price else 0
-        )
-
-        category_slug = p.get("category_id", "") or ""
-        category_name = ""
-        if category_slug:
-            cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
-            category_name = cat["name"] if cat else ""
-
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if image_urls else ""
-
-        in_cart = bool(customer_id) and (int(product_id) in cart_product_ids) if product_id is not None else False
-        in_wishlist = bool(customer_id) and (int(product_id) in wishlist_product_ids) if product_id is not None else False
-
-        results.append({
-            "product_id": product_id,
-            "name": p.get("name", ""),
-            "category_slug": category_slug,
-            "category_name": category_name,
-            "rating": get_average_rating(product_id),
-            "brand": p.get("Brand") or p.get("brand") or "",
-            "cover_image": cover_image,
-            "price": price,
-            "discounted_price": discounted,
-            "discount_percentage": discount_percentage,
-            "in_cart": in_cart,
-            "in_wishlist": in_wishlist,
-        })
-
-    return results
-    products_duplicate = database["products_duplicate"]
-
-    projection = {
-        "_id": 0,
-        "product_id": 1,
-        "name": 1,
-        "category_id": 1,
-        "price": 1,
-        "discounted_price": 1,
-        "image_urls": 1,
-        "Brand": 1,
-        "brand": 1,
-    }
-
-    cursor = products_duplicate.find({"is_hot_deal": True}, projection)
-    if limit:
-        cursor = cursor.limit(int(limit))
-
-    cart_product_ids = get_cart_product_ids_set(customer_id) if customer_id else set()
-
-    results = []
-    for p in cursor:
-        product_id = p.get("product_id")
-
-        price = _to_float(p.get("price", 0))
-        discounted = _to_float(p.get("discounted_price", price))
-        percentage_discount = _percentage_discount(price, discounted)
-
-        category_slug = p.get("category_id", "")
-        category_name = ""
-        if category_slug:
-            cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
-            category_name = cat["name"] if cat else ""
-
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if image_urls else ""
-
-        in_cart = bool(customer_id) and (int(product_id) in cart_product_ids) if product_id is not None else False
-
-        results.append({
-            "product_id": product_id,
-            "name": p.get("name", ""),
-            "category_slug": category_slug,
-            "category_name": category_name,
-            "rating": get_average_rating(product_id),
-            "brand": p.get("Brand") or p.get("brand") or "",
-            "cover_image": cover_image,
-            "price": price,
-            "discounted_price": discounted,
-            "percentage_discount": percentage_discount,  # ✅ NEW NAME
-            "in_cart": in_cart,
-        })
-
-    return results
-    # ✅ Use products_duplicate because that's where is_hot_deal exists
-    products_duplicate = database["products_duplicate"]
-
-    projection = {
-        "_id": 0,
-        "product_id": 1,
-        "name": 1,
-        "category_id": 1,
-        "price": 1,
-        "discounted_price": 1,
-        "image_urls": 1,
-        "Brand": 1,
-        "brand": 1,
-    }
-
-    cursor = products_duplicate.find({"is_hot_deal": True}, projection)
-    if limit:
-        cursor = cursor.limit(int(limit))
-
-    # ✅ cart lookup once (only if logged in)
-    cart_product_ids = get_cart_product_ids_set(customer_id) if customer_id else set()
-
-    results = []
-
-    for p in cursor:
-        product_id = p.get("product_id")
-
-        price = p.get("price", 0)
-        discounted = p.get("discounted_price", price)
-
-        discount_percentage = (
-            int(((price - discounted) / price) * 100)
-            if price and discounted < price else 0
-        )
-
-        category_slug = p.get("category_id", "")
-        category_name = ""
-        if category_slug:
-            cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
-            category_name = cat["name"] if cat else ""
-
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if image_urls else ""
-
-        # ✅ NEW: in_cart flag
-        in_cart = bool(customer_id) and (int(product_id) in cart_product_ids) if product_id is not None else False
-
-        results.append({
-            "product_id": product_id,
-            "name": p.get("name", ""),
-            "category_slug": category_slug,
-            "category_name": category_name,
-            "rating": get_average_rating(product_id),
-            "brand": p.get("Brand") or p.get("brand") or "",
-            "cover_image": cover_image,
-            "price": price,
-            "discounted_price": discounted,
-            "discount_percentage": discount_percentage,
-            "in_cart": in_cart,   # ✅ NEW
-        })
-
-    return results
-    products_duplicate = database["products_duplicate"]
-
-    projection = {
-        "_id": 0,
-        "product_id": 1,
-        "name": 1,
-        "category_id": 1,
-        "price": 1,
-        "discounted_price": 1,
-        "image_urls": 1,
-        "Brand": 1,
-        "brand": 1,
-    }
-
-    cursor = products_duplicate.find({"is_hot_deal": True}, projection)
-    if limit:
-        cursor = cursor.limit(int(limit))
-
-    results = []
-
-    for p in cursor:
-        price = p.get("price", 0)
-        discounted = p.get("discounted_price", price)
-
-        discount_percentage = (
-            int(((price - discounted) / price) * 100)
-            if price and discounted < price else 0
-        )
-
-        category_slug = p.get("category_id", "")
-        category_name = ""
-        if category_slug:
-            cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
-            category_name = cat["name"] if cat else ""
-
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if image_urls else ""
-
-        results.append({
-            "product_id": p.get("product_id"),
-            "name": p.get("name", ""),
-            "category_slug": category_slug,
-            "category_name": category_name,
-            "rating": get_average_rating(p.get("product_id")),
-            "brand": p.get("Brand") or p.get("brand") or "",
-            "cover_image": cover_image,
-            "price": price,
-            "discounted_price": discounted,
-            "discount_percentage": discount_percentage,
-        })
-
-    return results
-    """
-    Fetch products with is_hot_deal == True and return a list of dictionaries:
-    product_id, name, category_slug, category_name, rating, brand, cover_image, price, discounted_price
-
-    - category_slug is the parent category slug stored in product.category_id
-    - category_name is fetched from categories collection
-    - rating is computed from ratings collection (average)
-    - cover_image is the first element of product.image_urls
-    """
-
-    # ✅ Use products_duplicate because that's where you added is_hot_deal via script
-    products_duplicate = database["products_duplicate"]
-
-    query = {"is_hot_deal": True}
-    projection = {
-        "_id": 0,
-        "product_id": 1,
-        "name": 1,
-        "category_id": 1,
-        "price": 1,
-        "discounted_price": 1,
-        "image_urls": 1,
-        "Brand": 1,
-        "brand": 1
-    }
-
-    cursor = products_duplicate.find(query, projection)
-
-    if limit is not None:
-        cursor = cursor.limit(int(limit))
-
-    results: List[Dict[str, Any]] = []
-
-    for p in cursor:
-        product_id = p.get("product_id")
-        category_slug = p.get("category_id")
-
-        # Parent category name (by slug)
-        category_name = ""
-        if category_slug:
-            cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
-            category_name = cat.get("name") if cat else ""
-
-        # Average rating (using your existing function)
-        avg_rating = get_average_rating(product_id) if isinstance(product_id, int) else 0.0
-
-        # Brand (supports either "Brand" or "brand")
-        brand = p.get("Brand") or p.get("brand") or ""
-
-        # Cover image (first image_urls)
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if isinstance(image_urls, list) and len(image_urls) > 0 else ""
-
-        results.append({
-            "product_id": product_id,
-            "name": p.get("name", ""),
-            "category_slug": category_slug or "",
-            "category_name": category_name,
-            "rating": avg_rating,
-            "brand": brand,
-            "cover_image": cover_image,
-            "price": p.get("price", 0.0),
-            "discounted_price": p.get("discounted_price", p.get("price", 0.0)),
         })
 
     return results
@@ -1229,7 +868,7 @@ def get_latest_products_summary(limit: int = 20, customer_id: int | None = None)
         "category_id": 1,
         "price": 1,
         "discounted_price": 1,
-        "image_urls": 1,
+        "image_file_ids": 1,  # ✅ CHANGED
         "created_at": 1,
         "Brand": 1,
         "brand": 1,
@@ -1243,7 +882,7 @@ def get_latest_products_summary(limit: int = 20, customer_id: int | None = None)
     )
 
     cart_product_ids = get_cart_product_ids_set(customer_id) if customer_id else set()
-    wishlist_product_ids = get_wishlist_product_ids_set(customer_id) if customer_id else set()  # strings
+    wishlist_product_ids = get_wishlist_product_ids_set(customer_id) if customer_id else set()
 
     results = []
 
@@ -1260,8 +899,7 @@ def get_latest_products_summary(limit: int = 20, customer_id: int | None = None)
             cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
             category_name = cat.get("name", "") if cat else ""
 
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if isinstance(image_urls, list) and image_urls else ""
+        cover_image = _cover_image_from_file_ids(p)  # ✅ CHANGED
 
         in_cart = bool(customer_id) and (product_id is not None) and (int(product_id) in cart_product_ids)
         in_wishlist = bool(customer_id) and (product_id is not None) and (str(product_id) in wishlist_product_ids)
@@ -1276,389 +914,9 @@ def get_latest_products_summary(limit: int = 20, customer_id: int | None = None)
             "cover_image": cover_image,
             "price": price,
             "discounted_price": discounted,
-            "percentage_discount": percentage_discount,   # ✅ ONLY THIS KEY
+            "percentage_discount": percentage_discount,
             "in_cart": in_cart,
             "in_wishlist": in_wishlist,
-        })
-
-    return results
-    products_duplicate = database["products_duplicate"]
-
-    projection = {
-        "_id": 0,
-        "product_id": 1,
-        "name": 1,
-        "category_id": 1,
-        "price": 1,
-        "discounted_price": 1,
-        "image_urls": 1,
-        "created_at": 1,
-        "Brand": 1,
-        "brand": 1,
-    }
-
-    cursor = (
-        products_duplicate
-        .find({}, projection)
-        .sort("created_at", -1)
-        .limit(int(limit))
-    )
-
-    cart_product_ids = get_cart_product_ids_set(customer_id) if customer_id else set()
-    wishlist_product_ids = get_wishlist_product_ids_set(customer_id) if customer_id else set()
-
-    results = []
-
-    for p in cursor:
-        product_id = p.get("product_id")
-
-        price = p.get("price", 0) or 0
-        discounted = p.get("discounted_price", price)
-        discounted = discounted if discounted is not None else price
-
-        discount_percentage = (
-            int(((price - discounted) / price) * 100)
-            if price and discounted < price else 0
-        )
-
-        category_slug = p.get("category_id", "") or ""
-        category_name = ""
-        if category_slug:
-            cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
-            category_name = cat["name"] if cat else ""
-
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if image_urls else ""
-
-        in_cart = (
-            bool(customer_id) and product_id is not None and int(product_id) in cart_product_ids
-        )
-        in_wishlist = (
-            bool(customer_id) and product_id is not None and str(product_id) in wishlist_product_ids
-        )
-
-        results.append({
-            "product_id": product_id,
-            "name": p.get("name", "") or "",
-            "category_slug": category_slug,
-            "category_name": category_name,
-            "rating": get_average_rating(product_id),
-            "brand": p.get("Brand") or p.get("brand") or "",
-            "cover_image": cover_image,
-            "price": price,
-            "discounted_price": discounted,
-            "discount_percentage": discount_percentage,
-            "in_cart": in_cart,
-            "in_wishlist": in_wishlist,
-        })
-
-    return results
-    products_duplicate = database["products_duplicate"]
-
-    projection = {
-        "_id": 0,
-        "product_id": 1,
-        "name": 1,
-        "category_id": 1,
-        "price": 1,
-        "discounted_price": 1,
-        "image_urls": 1,
-        "created_at": 1,
-        "Brand": 1,
-        "brand": 1,
-    }
-
-    cursor = (
-        products_duplicate
-        .find({}, projection)
-        .sort("created_at", -1)
-        .limit(int(limit))
-    )
-
-    # ✅ cart + wishlist lookup once
-    cart_product_ids = get_cart_product_ids_set(customer_id) if customer_id else set()
-    wishlist_product_ids = get_wishlist_product_ids_set(customer_id) if customer_id else set()
-
-    results = []
-    for p in cursor:
-        product_id = p.get("product_id")
-
-        price = p.get("price", 0) or 0
-        discounted = p.get("discounted_price", price)
-        discounted = discounted if discounted is not None else price
-
-        discount_percentage = (
-            int(((price - discounted) / price) * 100)
-            if price and discounted < price else 0
-        )
-
-        category_slug = p.get("category_id", "") or ""
-        category_name = ""
-        if category_slug:
-            cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
-            category_name = cat["name"] if cat else ""
-
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if image_urls else ""
-
-        in_cart = bool(customer_id) and (int(product_id) in cart_product_ids) if product_id is not None else False
-        in_wishlist = bool(customer_id) and (int(product_id) in wishlist_product_ids) if product_id is not None else False
-
-        results.append({
-            "product_id": product_id,
-            "name": p.get("name", ""),
-            "category_slug": category_slug,
-            "category_name": category_name,
-            "rating": get_average_rating(product_id),
-            "brand": p.get("Brand") or p.get("brand") or "",
-            "cover_image": cover_image,
-            "price": price,
-            "discounted_price": discounted,
-            "discount_percentage": discount_percentage,
-            "in_cart": in_cart,
-            "in_wishlist": in_wishlist,
-        })
-
-    return results
-    products_duplicate = database["products_duplicate"]
-
-    projection = {
-        "_id": 0,
-        "product_id": 1,
-        "name": 1,
-        "category_id": 1,
-        "price": 1,
-        "discounted_price": 1,
-        "image_urls": 1,
-        "created_at": 1,
-        "Brand": 1,
-        "brand": 1,
-    }
-
-    cursor = (
-        products_duplicate
-        .find({}, projection)
-        .sort("created_at", -1)
-        .limit(int(limit))
-    )
-
-    cart_product_ids = get_cart_product_ids_set(customer_id) if customer_id else set()
-
-    results = []
-    for p in cursor:
-        product_id = p.get("product_id")
-
-        price = _to_float(p.get("price", 0))
-        discounted = _to_float(p.get("discounted_price", price))
-        percentage_discount = _percentage_discount(price, discounted)
-
-        category_slug = p.get("category_id", "")
-        category_name = ""
-        if category_slug:
-            cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
-            category_name = cat["name"] if cat else ""
-
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if image_urls else ""
-
-        in_cart = bool(customer_id) and (int(product_id) in cart_product_ids) if product_id is not None else False
-
-        results.append({
-            "product_id": product_id,
-            "name": p.get("name", ""),
-            "category_slug": category_slug,
-            "category_name": category_name,
-            "rating": get_average_rating(product_id),
-            "brand": p.get("Brand") or p.get("brand") or "",
-            "cover_image": cover_image,
-            "price": price,
-            "discounted_price": discounted,
-            "percentage_discount": percentage_discount,  # ✅ NEW NAME
-            "in_cart": in_cart,
-        })
-
-    return results
-    products_duplicate = database["products_duplicate"]
-
-    projection = {
-        "_id": 0,
-        "product_id": 1,
-        "name": 1,
-        "category_id": 1,
-        "price": 1,
-        "discounted_price": 1,
-        "image_urls": 1,
-        "created_at": 1,
-        "Brand": 1,
-        "brand": 1,
-    }
-
-    cursor = (
-        products_duplicate
-        .find({}, projection)
-        .sort("created_at", -1)
-        .limit(int(limit))
-    )
-
-    # ✅ cart lookup once (only if logged in)
-    cart_product_ids = get_cart_product_ids_set(customer_id) if customer_id else set()
-
-    results = []
-
-    for p in cursor:
-        product_id = p.get("product_id")
-
-        price = p.get("price", 0)
-        discounted = p.get("discounted_price", price)
-
-        discount_percentage = (
-            int(((price - discounted) / price) * 100)
-            if price and discounted < price else 0
-        )
-
-        category_slug = p.get("category_id", "")
-        category_name = ""
-        if category_slug:
-            cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
-            category_name = cat["name"] if cat else ""
-
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if image_urls else ""
-
-        # ✅ NEW: in_cart flag
-        in_cart = bool(customer_id) and (int(product_id) in cart_product_ids) if product_id is not None else False
-
-        results.append({
-            "product_id": product_id,
-            "name": p.get("name", ""),
-            "category_slug": category_slug,
-            "category_name": category_name,
-            "rating": get_average_rating(product_id),
-            "brand": p.get("Brand") or p.get("brand") or "",
-            "cover_image": cover_image,
-            "price": price,
-            "discounted_price": discounted,
-            "discount_percentage": discount_percentage,
-            "in_cart": in_cart,   # ✅ NEW
-        })
-
-    return results
-    products_duplicate = database["products_duplicate"]
-
-    projection = {
-        "_id": 0,
-        "product_id": 1,
-        "name": 1,
-        "category_id": 1,
-        "price": 1,
-        "discounted_price": 1,
-        "image_urls": 1,
-        "created_at": 1,
-        "Brand": 1,
-        "brand": 1,
-    }
-
-    cursor = (
-        products_duplicate
-        .find({}, projection)
-        .sort("created_at", -1)
-        .limit(int(limit))
-    )
-
-    results = []
-
-    for p in cursor:
-        price = p.get("price", 0)
-        discounted = p.get("discounted_price", price)
-
-        discount_percentage = (
-            int(((price - discounted) / price) * 100)
-            if price and discounted < price else 0
-        )
-
-        category_slug = p.get("category_id", "")
-        category_name = ""
-        if category_slug:
-            cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
-            category_name = cat["name"] if cat else ""
-
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if image_urls else ""
-
-        results.append({
-            "product_id": p.get("product_id"),
-            "name": p.get("name", ""),
-            "category_slug": category_slug,
-            "category_name": category_name,
-            "rating": get_average_rating(p.get("product_id")),
-            "brand": p.get("Brand") or p.get("brand") or "",
-            "cover_image": cover_image,
-            "price": price,
-            "discounted_price": discounted,
-            "discount_percentage": discount_percentage,
-        })
-
-    return results
-    """
-    Fetch latest products sorted by created_at (DESC) and return a list of dictionaries:
-    product_id, name, category_slug, category_name, rating, brand, cover_image, price, discounted_price
-    """
-
-    # Use products_duplicate (same collection where brand / hot deal exists)
-    products_duplicate = database["products_duplicate"]
-
-    projection = {
-        "_id": 0,
-        "product_id": 1,
-        "name": 1,
-        "category_id": 1,
-        "price": 1,
-        "discounted_price": 1,
-        "image_urls": 1,
-        "created_at": 1,
-        "Brand": 1,
-        "brand": 1
-    }
-
-    cursor = (
-        products_duplicate
-        .find({}, projection)
-        .sort("created_at", -1)   # 🔑 SORT BY CREATED_AT
-        .limit(int(limit))
-    )
-
-    results: List[Dict[str, Any]] = []
-
-    for p in cursor:
-        product_id = p.get("product_id")
-        category_slug = p.get("category_id")
-
-        # Parent category name
-        category_name = ""
-        if category_slug:
-            cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
-            category_name = cat.get("name") if cat else ""
-
-        # Average rating
-        avg_rating = get_average_rating(product_id) if isinstance(product_id, int) else 0.0
-
-        # Brand (supports both Brand / brand)
-        brand = p.get("Brand") or p.get("brand") or ""
-
-        # Cover image
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if isinstance(image_urls, list) and image_urls else ""
-
-        results.append({
-            "product_id": product_id,
-            "name": p.get("name", ""),
-            "category_slug": category_slug or "",
-            "category_name": category_name,
-            "rating": avg_rating,
-            "brand": brand,
-            "cover_image": cover_image,
-            "price": p.get("price", 0.0),
-            "discounted_price": p.get("discounted_price", p.get("price", 0.0)),
         })
 
     return results
@@ -2068,7 +1326,7 @@ def search_products_advanced(
         "category_id": 1,
         "price": 1,
         "discounted_price": 1,
-        "image_urls": 1,
+        "image_file_ids": 1,
         "Brand": 1,
         "brand": 1,
     }
@@ -2125,8 +1383,8 @@ def search_products_advanced(
         category_slug = p.get("category_id", "") or ""
         category_name = get_category_name(category_slug)
 
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if isinstance(image_urls, list) and image_urls else ""
+        image_file_ids = p.get("image_file_ids") or []
+        cover_image = f"/core/ops/images/{str(image_file_ids[0])}" if isinstance(image_file_ids, list) and image_file_ids else ""
 
         in_cart = bool(customer_id) and (product_id is not None) and (int(product_id) in cart_product_ids)
         in_wishlist = bool(customer_id) and (product_id is not None) and (str(product_id) in wishlist_product_ids)
@@ -2188,7 +1446,7 @@ def get_wishlist_products_summary(limit: int | None = None, customer_id: int | N
         "category_id": 1,
         "price": 1,
         "discounted_price": 1,
-        "image_urls": 1,
+        "image_file_ids": 1,   # ✅ CHANGED
         "Brand": 1,
         "brand": 1,
     }
@@ -2221,8 +1479,8 @@ def get_wishlist_products_summary(limit: int | None = None, customer_id: int | N
             cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
             category_name = cat.get("name", "") if cat else ""
 
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if isinstance(image_urls, list) and image_urls else ""
+        image_file_ids = p.get("image_file_ids") or []  # ✅ CHANGED
+        cover_image = f"/core/ops/images/{str(image_file_ids[0])}" if isinstance(image_file_ids, list) and image_file_ids else ""  # ✅ CHANGED
 
         in_cart = bool(customer_id) and (product_id is not None) and (int(product_id) in cart_product_ids)
         in_wishlist = bool(customer_id) and (product_id is not None) and (str(product_id) in wishlist_product_ids_set)
@@ -2298,7 +1556,7 @@ def get_cart_items_basic(customer_id: int) -> list[dict]:
         "category_id": 1,
         "price": 1,
         "discounted_price": 1,
-        "image_urls": 1,
+        "image_file_ids": 1,  # ✅ changed
     }
 
     cursor = products.find({"product_id": {"$in": order_unique}}, projection)
@@ -2309,8 +1567,12 @@ def get_cart_items_basic(customer_id: int) -> list[dict]:
         if product_id is None:
             continue
 
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if isinstance(image_urls, list) and image_urls else ""
+        image_file_ids = p.get("image_file_ids") or []
+        cover_image = (
+            f"/core/ops/images/{str(image_file_ids[0])}"
+            if isinstance(image_file_ids, list) and image_file_ids
+            else ""
+        )
 
         base_price = _to_float(p.get("price", 0))
         discounted = p.get("discounted_price", None)
@@ -2335,6 +1597,7 @@ def get_cart_items_basic(customer_id: int) -> list[dict]:
             results.append(row)
 
     return results
+
 
 def empty_cart(customer_id: int) -> bool:
     """
@@ -2576,10 +1839,14 @@ def get_product_details(product_id: int, customer_id: int | None = None) -> dict
     p["category_name"] = category_name
     p["subcategory_name"] = subcategory_name
 
-    # --- cover image ---
-    image_urls = p.get("image_urls") or []
-    cover_image = image_urls[0] if isinstance(image_urls, list) and image_urls else ""
-    p["cover_image"] = cover_image
+    # --- images (GridFS -> URLs) + cover image ---  ✅ ONLY CHANGED SECTION
+    image_file_ids = p.get("image_file_ids") or []
+    image_urls = []
+    if isinstance(image_file_ids, list) and image_file_ids:
+        image_urls = [f"/core/ops/images/{str(fid)}" for fid in image_file_ids if fid]
+
+    p["image_urls"] = image_urls  # ✅ keep same key for existing HTML loop
+    p["cover_image"] = image_urls[0] if image_urls else ""
 
     # --- brand normalization ---
     p["brand"] = p.get("Brand") or p.get("brand") or ""
@@ -2598,18 +1865,15 @@ def get_product_details(product_id: int, customer_id: int | None = None) -> dict
     ratings_cursor = ratings.find(
         {"product_id": pid},
         {"_id": 0, "name": 1, "rating": 1, "review": 1, "created_at": 1}
-    ).sort([("rating", -1), ("created_at", -1)])  # ✅ best -> worst, then newest
+    ).sort([("rating", -1), ("created_at", -1)])
 
     ratings_list = []
     for r in ratings_cursor:
         dt = r.get("created_at")
-
-        # format like: June 8, 2023
         if isinstance(dt, datetime):
             r["created_at_formatted"] = dt.strftime("%B %d, %Y").replace(" 0", " ")
         else:
             r["created_at_formatted"] = ""
-
         ratings_list.append(r)
 
     p["ratings_list"] = ratings_list
@@ -4588,7 +3852,7 @@ def get_recently_viewed_products_summary(
         "category_id": 1,
         "price": 1,
         "discounted_price": 1,
-        "image_urls": 1,
+        "image_file_ids": 1,
         "Brand": 1,
         "brand": 1,
     }
@@ -4626,9 +3890,9 @@ def get_recently_viewed_products_summary(
             cat = categories.find_one({"slug": category_slug}, {"name": 1, "_id": 0})
             category_name = cat.get("name", "") if cat else ""
 
-        image_urls = p.get("image_urls") or []
-        cover_image = image_urls[0] if isinstance(image_urls, list) and image_urls else ""
-
+        image_file_ids = p.get("image_file_ids") or []
+        cover_image = f"/core/ops/images/{str(image_file_ids[0])}" if isinstance(image_file_ids, list) and image_file_ids else ""
+        
         in_cart = bool(customer_id) and (product_id is not None) and (int(product_id) in cart_product_ids)
         in_wishlist = bool(customer_id) and (product_id is not None) and (str(product_id) in wishlist_product_ids)
 
@@ -4763,6 +4027,9 @@ def build_order_details_view(order_doc: dict) -> dict:
             (p.get("discounted_price") if p.get("discounted_price") is not None else p.get("price")) or 0
         )
 
+        image_file_ids = p.get("image_file_ids") or []
+        image_url = f"/core/ops/images/{str(image_file_ids[0])}" if isinstance(image_file_ids, list) and image_file_ids else None
+
         enriched_items.append(
             {
                 "product_id": pid,
@@ -4770,7 +4037,7 @@ def build_order_details_view(order_doc: dict) -> dict:
                 "name": p.get("name", f"Product #{pid}"),
                 "unit": p.get("unit"),
                 "size": p.get("size"),
-                "image_url": (p.get("image_urls") or [None])[0],
+                "image_url": image_url,  # ✅ updated
                 "unit_price": unit_price,
                 "line_total": float(unit_price * qty),
                 "category_id": p.get("category_id"),
@@ -4784,11 +4051,74 @@ def build_order_details_view(order_doc: dict) -> dict:
 
     return order_doc
 
-
-
 def delete_session_by_id(session_id: str) -> None:
     database["sessions"].delete_one({"session_id": session_id})
 
+
+
+
+def gridfs_save_images(
+    product_id: int,
+    files: List[tuple[bytes, str, str]]
+) -> List[ObjectId]:
+    """
+    Save multiple images to GridFS.
+    files = [(bytes, filename, content_type), ...]
+    Returns list of ObjectIds.
+    """
+    file_ids: List[ObjectId] = []
+
+    for data, filename, content_type in files:
+        if not data:
+            continue
+
+        fid = fs.put(
+            data,
+            filename=filename or "image",
+            content_type=content_type or "application/octet-stream",
+            metadata={"product_id": int(product_id)}
+        )
+        file_ids.append(fid)
+
+    return file_ids
+
+
+def gridfs_get_file(file_id: str):
+    """
+    Returns a GridOut object (file stream) or None if not found/invalid.
+    """
+    try:
+        return fs.get(ObjectId(file_id))
+    except Exception:
+        return None
+
+
+def gridfs_delete_files(file_ids: List[Any]) -> int:
+    """
+    Best-effort delete. Returns how many were deleted (attempted and successful).
+    Accepts ObjectIds or strings.
+    """
+    deleted = 0
+    for fid in (file_ids or []):
+        try:
+            oid = fid if isinstance(fid, ObjectId) else ObjectId(str(fid))
+            fs.delete(oid)
+            deleted += 1
+        except Exception:
+            pass
+    return deleted
+
+
+
+def _cover_image_from_file_ids(p: dict) -> str:
+    """
+    Returns a browser-loadable URL for the first GridFS image.
+    """
+    ids = p.get("image_file_ids") or []
+    if isinstance(ids, list) and ids:
+        # ObjectId -> string
+        return f"/core/ops/images/{str(ids[0])}"
+    return ""
 
 
 
