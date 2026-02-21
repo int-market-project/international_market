@@ -30,6 +30,11 @@ from schemas import *
 from database import *
 from methods import send_email
 
+from fastapi import UploadFile, File
+from fastapi.responses import StreamingResponse
+from typing import List
+from bson import ObjectId
+
 load_dotenv()
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "").strip()
@@ -1967,7 +1972,7 @@ async def admin_add_product_page(request: Request):
                 "Brand": "",
                 "is_featured": False,
                 "is_hot_deal": False,
-                "image_urls_csv": "",
+                "image_file_ids": [],
             },
         }
     )
@@ -1990,13 +1995,6 @@ async def admin_update_product_page(request: Request, product_id: int):
     if not p:
         return RedirectResponse(url="/core/ops/admin/dashboard/look-up-product", status_code=302)
 
-    # csv view for image urls
-    image_urls = p.get("image_urls") or []
-    if isinstance(image_urls, list):
-        image_urls_csv = ", ".join([str(x).strip() for x in image_urls if str(x).strip()])
-    else:
-        image_urls_csv = ""
-
     # normalize default dropdowns
     if not p.get("category_id"):
         p["category_id"] = "all"
@@ -2005,7 +2003,8 @@ async def admin_update_product_page(request: Request, product_id: int):
     if p["category_id"] == "all":
         p["sub_category_id"] = "all"
 
-    p["image_urls_csv"] = image_urls_csv
+    # ensure images list exists for template (GridFS ids)
+    p["image_file_ids"] = p.get("image_file_ids") or []
 
     return templates.TemplateResponse(
         "admin_add_or_update_products.html",
@@ -2049,7 +2048,8 @@ async def admin_api_create_product(
     is_featured: str | None = Form(None),
     is_hot_deal: str | None = Form(None),
 
-    image_urls_csv: str = Form(""),
+    # ✅ NEW: multiple images
+    images: List[UploadFile] = File(default=[]),
 ):
     current_admin = get_current_admin(request)
     if not current_admin:
@@ -2061,10 +2061,14 @@ async def admin_api_create_product(
     if category_id == "all":
         sub_category_id = "all"
 
-    # Parse images
-    image_urls = []
-    if image_urls_csv:
-        image_urls = [u.strip() for u in image_urls_csv.split(",") if u.strip()]
+    # ✅ Save images to GridFS
+    upload_payload = []
+    for img in images or []:
+        data = await img.read()
+        if data:
+            upload_payload.append((data, img.filename or "image", img.content_type or "image/jpeg"))
+
+    image_file_ids = gridfs_save_images(product_id=int(product_id), files=upload_payload)
 
     product_doc = {
         "product_id": int(product_id),
@@ -2087,7 +2091,8 @@ async def admin_api_create_product(
         "is_featured": bool(is_featured),
         "is_hot_deal": bool(is_hot_deal),
 
-        "image_urls": image_urls,
+        # ✅ NEW FIELD
+        "image_file_ids": image_file_ids,
     }
 
     try:
@@ -2109,12 +2114,12 @@ async def admin_api_create_product(
                 "categories_with_subcategories": categories_with_subcategories,
                 "product": {
                     **product_doc,
-                    "image_urls_csv": image_urls_csv,
+                    # for template safety
+                    "image_file_ids": [str(x) for x in (image_file_ids or [])],
                 },
             },
             status_code=400
         )
-
 
 # ============================================================
 # ADMIN PRODUCTS API: Update Product (POST)
@@ -2145,7 +2150,8 @@ async def admin_api_update_product(
     is_featured: str | None = Form(None),
     is_hot_deal: str | None = Form(None),
 
-    image_urls_csv: str = Form(""),
+    # ✅ NEW: multiple images
+    images: List[UploadFile] = File(default=[]),
 ):
     current_admin = get_current_admin(request)
     if not current_admin:
@@ -2155,10 +2161,6 @@ async def admin_api_update_product(
     sub_category_id = (sub_category_id or "all").strip()
     if category_id == "all":
         sub_category_id = "all"
-
-    image_urls = []
-    if image_urls_csv:
-        image_urls = [u.strip() for u in image_urls_csv.split(",") if u.strip()]
 
     updates = {
         "name": (name or "").strip(),
@@ -2179,9 +2181,26 @@ async def admin_api_update_product(
 
         "is_featured": bool(is_featured),
         "is_hot_deal": bool(is_hot_deal),
-
-        "image_urls": image_urls,
     }
+
+    # We consumed file streams above if we do it like that, so we must not.
+    # Instead do a safe single-pass read:
+    upload_payload = []
+    if images:
+        for img in images:
+            data = await img.read()
+            if data:
+                upload_payload.append((data, img.filename or "image", img.content_type or "image/jpeg"))
+
+    if upload_payload:
+        # delete old images
+        existing = get_product_by_id_admin(product_id) or {}
+        old_ids = existing.get("image_file_ids") or []
+        gridfs_delete_files(old_ids)
+
+        # save new images
+        new_ids = gridfs_save_images(product_id=int(product_id), files=upload_payload)
+        updates["image_file_ids"] = new_ids
 
     try:
         ok = update_product_admin(product_id, updates)
@@ -2195,10 +2214,8 @@ async def admin_api_update_product(
     except Exception as e:
         categories_with_subcategories = get_categories_with_subcategories()
         p = get_product_by_id_admin(product_id) or {}
-        # keep user's typed values on error
         p.update(updates)
         p["product_id"] = product_id
-        p["image_urls_csv"] = image_urls_csv
 
         return templates.TemplateResponse(
             "admin_add_or_update_products.html",
@@ -2213,7 +2230,6 @@ async def admin_api_update_product(
             },
             status_code=400
         )
-
 
 # ============================================================
 # ADMIN PRODUCTS API: Delete Product (DELETE)
@@ -3695,3 +3711,14 @@ async def admin_api_reply_message(
 
 
 
+@app.get("/core/ops/images/{file_id}")
+async def serve_image(file_id: str):
+    grid_out = gridfs_get_file(file_id)
+    if not grid_out:
+        return JSONResponse({"ok": False, "detail": "Image not found"}, status_code=404)
+
+    return StreamingResponse(
+        grid_out,
+        media_type=getattr(grid_out, "content_type", None) or "application/octet-stream"
+    )
+    
